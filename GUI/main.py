@@ -11,36 +11,35 @@ dit is de start, geen implementatie, alleen basis voor PyQt5
 
 
 import sys
-
-import time
+import datetime
 import os
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
+from PyQt5.QtGui import QStandardItemModel, QStandardItem
 import random
 from statistics import mean, stdev
-from project_ui import *
+from window_ui import *
 import matplotlib
 matplotlib.use("Qt5Agg")
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
-
 TIMER_INTERVAL_VALUE = 100
 
-class Lab1(QMainWindow):
+class shootMovingUI(QMainWindow):
     def __init__(self, *args):
         QMainWindow.__init__(self)
 
         #All variables:
-        self._ax = 0
-        self._ay = 0 #accelerometer x,y,z
-        self._az = 0
+        self.ax = 0
+        self.ay = 0 #accelerometer x,y,z
+        self.az = 0
 
-        self._gx = 0
-        self._gy = 0 #gyroscoop x,y,z
-        self._gz = 0
+        self.gx = 0
+        self.gy = 0 #gyroscoop x,y,z
+        self.gz = 0
 
         self.t = [] #time
 
@@ -68,6 +67,14 @@ class Lab1(QMainWindow):
         self.ui.buttonChooseStart.clicked.connect(self.demonstrationFunction)
         self.ui.buttonChooseTest.clicked.connect(self.demonstrationFunction)
 
+        #Logging:
+        self._log = []
+        self._logModel = QStandardItemModel()
+        self.ui.logList.setModel(self._logModel)
+        self._logDebug = True
+        self._logDebugTimer = -1
+        self._csv_filename = None
+
 
     def demonstrationFunction(self):
         """
@@ -85,9 +92,6 @@ class Lab1(QMainWindow):
             self.timer.start()
 
     def csvSave(self):
-        """
-        Dit is van lab2.
-        """
         with open(self.csv_filename, 'w') as f:
             f.write("t,x,y,z\n")
             for t, ax, ay, az in zip(self.listAllT, self.listAllAx, self.listAllAy, self.listAllAz):
@@ -108,65 +112,49 @@ class Lab1(QMainWindow):
         #self.ui.MplWidget.canvas.axes.legend(loc= 'upper left')
         #self.ui.MplWidget.canvas.draw()
 
+    def logging(self, fallType):
+        """
+        Logs a fall incident with date, time, max acceleration values and fall type.
+        """
+        if self._logDebug:
+            self._logDebug = not self._logDebug
+            self._logDebugTimer = 0
+        else:
+            return
 
-    # a = accelerometer
-    @property
-    def ax(self):
-        return self._ax
+        amountFramesCheck = min(
+            min(len(self.allAccelValues[0]),
+                len(self.allAccelValues[1]),
+                len(self.allAccelValues[2])),
+            1000 // TIMER_INTERVAL_VALUE)
 
-    @ax.setter
-    def ax(self,value):
-        self._ax = value
+        self._maxAcceleration = [[], [], []]
+        for i in range(3):
+            maxValue = 0
+            for frame in range(1, amountFramesCheck + 1):
+                if abs(self.allAccelValues[i][-frame]) > maxValue:
+                    maxValue = abs(self.allAccelValues[i][-frame])
+            self._maxAcceleration[i].append(maxValue)
 
+        date = datetime.datetime.now().date()
+        currentTime = datetime.datetime.now().time()
+        dateText = str(date.year).zfill(2) + ":" + str(date.month).zfill(2) + ":" + str(date.day).zfill(2)
+        currentTimeText = str(currentTime.hour).zfill(2) + ":" + \
+            str(currentTime.minute).zfill(2) + ":" + str(currentTime.second).zfill(2)
 
-    @property
-    def ay(self):
-        return self._ay
+        axText = round(self._maxAcceleration[0][0], 3)
+        ayText = round(self._maxAcceleration[1][0], 3)
+        azText = round(self._maxAcceleration[2][0], 3)
 
-    @ay.setter
-    def ay(self,value):
-        self._ay = value
+        text = [dateText, currentTimeText, axText, ayText, azText, fallType]
+        self._log.append(text)
+        self._logModel.appendRow(QStandardItem(
+            f"Date:{text[0]} Time:{text[1]} | ax:{text[2]} ay:{text[3]} az:{text[4]} | Falltype: {text[5]}"))
+        print(self._log)
 
-
-    @property
-    def az(self):
-        return self._az
-
-    @az.setter
-    def az(self,value):
-        self._az = value
-
-
-
-    # g = gyroscoop
-    @property
-    def gx(self):
-        return self._gx
-
-    @gx.setter
-    def gx(self,value):
-        self._gx = value
-
-
-    @property
-    def gy(self):
-        return self._gy
-
-    @gy.setter
-    def gy(self,value):
-        self._gy = value
-
-
-    @property
-    def gz(self):
-        return self._gz
-
-    @gz.setter
-    def gz(self,value):
-        self._gz = value
 
 if __name__ == "__main__":
     app = QApplication([])
-    form = Lab1()
+    form = shootMovingUI()
     form.show()
     sys.exit(app.exec_())
