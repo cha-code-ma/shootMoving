@@ -8,7 +8,11 @@ Notities voor github pushing:
 dit is de start, geen implementatie, alleen basis voor PyQt5
 
 """
-
+import argparse
+import asyncio
+from bleak import BleakClient
+from bleak import BleakScanner
+from bleak import discover
 
 import sys
 import datetime
@@ -27,7 +31,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 TIMER_INTERVAL_VALUE = 100
-
+ARDUINO_LOCAL_NAME = "BLE-AR48"  #Use the correct Arduino number in this identifier!!
+LED_UUID = "19b10001-e8f2-537e-4f6c-d104768a1214"
+on_value = bytearray([0x01])
+off_value = bytearray([0x00])
 class shootMovingUI(QMainWindow):
     def __init__(self, *args):
         QMainWindow.__init__(self)
