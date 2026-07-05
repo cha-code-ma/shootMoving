@@ -67,17 +67,22 @@ class BleCommunicationManager(QThread):
 
 
         args = parser.parse_args()
-        (d,a) = await self.find_ble_device(args)
-        if (d,a) != (None, None):
-            None
-        else:
-            print("arduino not found")
+        d,a = None, None
+        for i in range(3):
+            (d,a) = await self.find_ble_device(args)
+            if (d,a) != (None, None):
+                break
+            else:
+                print(f"arduino not found. Try: {i}")
+                if i == 3:
+                    exit(1)
+
         async with BleakClient(d.address) as client:
 
 
             while client.is_connected:
                 data = await client.read_gatt_char(SENSOR_UUID)
-                values = struct.unpack('6f', data)
-                valuesList = [values[0], values[1], values[2], values[3], values[4], values[5]]
+                values = struct.unpack('7f', data)
+                valuesList = [values[0], values[1], values[2], values[3], values[4], values[5], values[6]]
                 self.data.emit(valuesList)
                 await asyncio.sleep(0.2)

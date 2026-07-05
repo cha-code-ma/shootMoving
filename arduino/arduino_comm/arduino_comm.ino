@@ -4,7 +4,7 @@
 #define BLE_UUID_SENSOR_DATA_SERVICE "2BEEF31A-B10D-271C-C9EA-35D865C1F48A"
 #define BLE_UUID_ACCEL_SENSOR_DATA   "4664E7A1-5A13-BFFF-4636-7D0A4B16496C"
 
-#define NUMBER_OF_VALUES 6
+#define NUMBER_OF_VALUES 7
 
 // IMU wordt elke 10 ms uitgelezen.
 // BLE stuurt elke 50 ms de laatst gemeten waarden naar de GUI.
@@ -17,6 +17,7 @@
 
 const int BLE_LED_PIN = LED_BUILTIN;
 const int BUZZER_PIN = 3;
+unsigned long startMillis;
 
 union multi_sensor_data {
   struct __attribute__((packed)) {
@@ -66,10 +67,10 @@ void loop() {
   if (central) {
     Serial.print("Connected to central: ");
     Serial.println(central.address());
-
+    startMillis = millis();
     while (central.connected()) {
         readImuValues();
-        printDebugValues();
+        //printDebugValues();
         accelSensorGyroCharacteristic.writeValue(
           accelGyroSensorData.bytes,
           sizeof accelGyroSensorData.bytes
@@ -109,6 +110,7 @@ void readImuValues() {
     accelGyroSensorData.values[4] = gy;
     accelGyroSensorData.values[5] = gz;
   }
+  accelGyroSensorData.values[6] = millis() - startMillis;
 }
 
 
