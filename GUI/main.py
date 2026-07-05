@@ -13,7 +13,7 @@ import asyncio
 from bleak import BleakClient
 from bleak import BleakScanner
 from bleak import discover
-
+import logic.detectArduino
 import sys
 import datetime
 import os
@@ -40,15 +40,16 @@ class shootMovingUI(QMainWindow):
         QMainWindow.__init__(self)
 
         #All variables:
-        self.ax = 0
-        self.ay = 0 #accelerometer x,y,z
-        self.az = 0
-
-        self.gx = 0
-        self.gy = 0 #gyroscoop x,y,z
-        self.gz = 0
-
-        self.t = [] #time
+        self.allValues = {
+            'ax' : [0],
+            'ay' : [0],
+            'az' : [0],
+            'gx' : [0],
+            'gy' : [0],
+            'gz' : [0],
+            't'  : [0]
+        }
+        self.varList = ['ax', 'ay', 'az', 'gx', 'gy', 'gz']
 
         #MPLwidget:
         self.ui = Ui_Form()
@@ -81,6 +82,22 @@ class shootMovingUI(QMainWindow):
         self._logDebug = True
         self._logDebugTimer = -1
         self._csv_filename = None
+
+        #BLE communication:
+        self.bleComManager = logic.detectArduino.BleCommunicationManager()
+        self.bleComManager.statusUpdate.connect(lambda msg: self.addValues(msg))
+        self.ui.buttonStart.clicked.connect(self.bleWorker.start)    # .start() start de thread, roept run() aan
+
+    def addValues(self, values):
+        for i in range(len(values)):
+            value = self.varList[i]
+            self.allValues[value].append(values[value])
+
+        if len(self.allValues['t']) > 100:
+            for i in range(len(self.allValues)):
+                value = self.varList[i]
+                self.allValues[value].pop(0)
+
 
 
     def demonstrationFunction(self):
