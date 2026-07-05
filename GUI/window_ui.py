@@ -67,15 +67,15 @@ class Ui_Form(object):
         self.simStateText = QtWidgets.QPlainTextEdit(Form)
         self.simStateText.setGeometry(QtCore.QRect(120, 510, 104, 70))
         self.simStateText.setObjectName("simStateText")
-        self.simDetectionText = QtWidgets.QPlainTextEdit(Form)
-        self.simDetectionText.setGeometry(QtCore.QRect(440, 490, 104, 70))
-        self.simDetectionText.setObjectName("simDetectionText")
+        self.shootDetection = QtWidgets.QPlainTextEdit(Form)
+        self.shootDetection.setGeometry(QtCore.QRect(440, 490, 104, 70))
+        self.shootDetection.setObjectName("shootDetection")
         self.plainTextEdit = QtWidgets.QPlainTextEdit(Form)
         self.plainTextEdit.setGeometry(QtCore.QRect(110, 480, 151, 31))
         self.plainTextEdit.setStyleSheet("background-color: rgba(191, 64, 64, 0);")
         self.plainTextEdit.setObjectName("plainTextEdit")
         self.plainTextEdit_2 = QtWidgets.QPlainTextEdit(Form)
-        self.plainTextEdit_2.setGeometry(QtCore.QRect(430, 460, 151, 31))
+        self.plainTextEdit_2.setGeometry(QtCore.QRect(410, 460, 171, 31))
         self.plainTextEdit_2.setStyleSheet("background-color: rgba(191, 64, 64, 0);")
         self.plainTextEdit_2.setObjectName("plainTextEdit_2")
 
@@ -90,5 +90,5 @@ class Ui_Form(object):
         self.buttonChooseTest.setText(_translate("Form", "Simulatiemodus"))
         self.buttonChooseStart.setText(_translate("Form", "Start"))
         self.plainTextEdit.setPlainText(_translate("Form", "Current real state:"))
-        self.plainTextEdit_2.setPlainText(_translate("Form", "Detected State:"))
-from .mplwidget import MplWidget
+        self.plainTextEdit_2.setPlainText(_translate("Form", "ShootDetected State:"))
+from mplwidget import MplWidget

@@ -150,7 +150,7 @@ background-color: rgb(38, 162, 105);</string>
     </rect>
    </property>
   </widget>
-  <widget class="QPlainTextEdit" name="simDetectionText">
+  <widget class="QPlainTextEdit" name="shootDetection">
    <property name="geometry">
     <rect>
      <x>440</x>
@@ -179,9 +179,9 @@ background-color: rgb(38, 162, 105);</string>
   <widget class="QPlainTextEdit" name="plainTextEdit_2">
    <property name="geometry">
     <rect>
-     <x>430</x>
+     <x>410</x>
      <y>460</y>
-     <width>151</width>
+     <width>171</width>
      <height>31</height>
     </rect>
    </property>
@@ -189,7 +189,7 @@ background-color: rgb(38, 162, 105);</string>
     <string notr="true">background-color: rgba(191, 64, 64, 0);</string>
    </property>
    <property name="plainText">
-    <string>Detected State:</string>
+    <string>ShootDetected State:</string>
    </property>
   </widget>
  </widget>
