@@ -39,7 +39,6 @@ BLECharacteristic accelSensorGyroCharacteristic(
 void setup() {
   Serial.begin(9600);
   delay(1000);
-
   pinMode(BLE_LED_PIN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
 
@@ -48,7 +47,7 @@ void setup() {
     while (1);
   }
 
-  for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
+  for (int i = 0; i < NUMBER_OF_VALUES; i++) {
     accelGyroSensorData.values[i] = 0.0;
   }
 
@@ -69,7 +68,8 @@ void loop() {
     Serial.println(central.address());
 
     while (central.connected()) {
-
+        readImuValues();
+        printDebugValues();
         accelSensorGyroCharacteristic.writeValue(
           accelGyroSensorData.bytes,
           sizeof accelGyroSensorData.bytes
@@ -82,6 +82,10 @@ void loop() {
     Serial.println(central.address());
 
 
+    digitalWrite(BLE_LED_PIN, HIGH);
+    delay(3000);
+    digitalWrite(BLE_LED_PIN, LOW);
+    delay(3000);
     digitalWrite(BLE_LED_PIN, HIGH);
   }
 }
@@ -129,8 +133,8 @@ bool setupBleMode() {
     return false;
   }
 
-  BLE.setDeviceName("Fallguard");
-  BLE.setLocalName("Fallguard");
+  BLE.setDeviceName("Chakir");
+  BLE.setLocalName("Chakir");
   BLE.setAdvertisedService(sensorDataService);
 
   sensorDataService.addCharacteristic(accelSensorGyroCharacteristic);

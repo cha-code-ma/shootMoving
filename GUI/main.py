@@ -12,8 +12,9 @@ import argparse
 import asyncio
 from bleak import BleakClient
 from bleak import BleakScanner
-from bleak import discover
+
 import logic.detectArduino
+from GUI.window_ui import Ui_Form
 import sys
 import datetime
 import os
@@ -23,6 +24,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 import random
+from .mplwidget import MplWidget
 from statistics import mean, stdev
 from window_ui import *
 import matplotlib
@@ -35,21 +37,14 @@ ARDUINO_LOCAL_NAME = "BLE-AR48"  #Use the correct Arduino number in this identif
 LED_UUID = "19b10001-e8f2-537e-4f6c-d104768a1214"
 on_value = bytearray([0x01])
 off_value = bytearray([0x00])
+
 class shootMovingUI(QMainWindow):
     def __init__(self, *args):
         QMainWindow.__init__(self)
 
         #All variables:
-        self.allValues = {
-            'ax' : [0],
-            'ay' : [0],
-            'az' : [0],
-            'gx' : [0],
-            'gy' : [0],
-            'gz' : [0],
-            't'  : [0]
-        }
-        self.varList = ['ax', 'ay', 'az', 'gx', 'gy', 'gz']
+        self.allValues = [[0], [0], [0], [0], [0], [0]]
+        #self.varList = ['ax', 'ay', 'az', 'gx', 'gy', 'gz']
 
         #MPLwidget:
         self.ui = Ui_Form()
@@ -85,20 +80,31 @@ class shootMovingUI(QMainWindow):
 
         #BLE communication:
         self.bleComManager = logic.detectArduino.BleCommunicationManager()
-        self.bleComManager.statusUpdate.connect(lambda msg: self.addValues(msg))
-        self.ui.buttonStart.clicked.connect(self.bleWorker.start)    # .start() start de thread, roept run() aan
+        self.bleComManager.data.connect(self.addValues)
+        self.ui.buttonTest.clicked.connect(self.startFunction)
+
+
+    def startFunction(self):
+        self.bleComManager.start() # .start() start de thread, roept run() aan
+        self.timerEvent()
+        self.timer.start()
 
     def addValues(self, values):
-        for i in range(len(values)):
-            value = self.varList[i]
-            self.allValues[value].append(values[value])
+        if type(values) is bool or len(values) != 6:
+            return None
 
-        if len(self.allValues['t']) > 100:
+        for i in range(6):
+            self.allValues[i].append(values[i])
+
+        if len(self.allValues[0]) > 100:
             for i in range(len(self.allValues)):
-                value = self.varList[i]
-                self.allValues[value].pop(0)
+                self.allValues[i].pop(0)
 
-
+    def chooseValuesIndex(self, index):
+        list = []
+        for i in range(6):
+            list.append(self.allValues[i][index])
+        return list
 
     def demonstrationFunction(self):
         """
@@ -124,7 +130,8 @@ class shootMovingUI(QMainWindow):
 
     def timerEvent(self):
 
-
+        lastValues = self.chooseValuesIndex(-1)
+        print(f"lastValues:\n{lastValues}")
         self.ui.MplWidget.canvas.axes.clear()
         #self.ui.MplWidget.canvas.axes.set_ylim( , )
         #self.ui.MplWidget.canvas.axes.plot(self.t, self.list_ax,'r',linewidth= 0.5, label = 'x')

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'sim.ui'
+# Form implementation generated from reading ui file 'window.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.11
 #
@@ -91,4 +91,4 @@ class Ui_Form(object):
         self.buttonChooseStart.setText(_translate("Form", "Start"))
         self.plainTextEdit.setPlainText(_translate("Form", "Current real state:"))
         self.plainTextEdit_2.setPlainText(_translate("Form", "Detected State:"))
-from mplwidget import MplWidget
+from .mplwidget import MplWidget

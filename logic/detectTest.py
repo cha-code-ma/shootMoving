@@ -1,7 +1,8 @@
 """
 Github: cha-code-ma
-In this file, logic will be made of
-connecting to arduino.
+In this file, de adruino connection can be checked,
+with the arduino file:
+arduino_comm.ino
 
 """
 import argparse
@@ -20,7 +21,6 @@ on_value = bytearray([0x01])
 off_value = bytearray([0x00])
 
 class BleCommunicationManager(QThread):
-    data = pyqtSignal(list)
 
     def run(self):
         asyncio.run(self._main())
@@ -79,5 +79,16 @@ class BleCommunicationManager(QThread):
                 data = await client.read_gatt_char(SENSOR_UUID)
                 values = struct.unpack('6f', data)
                 valuesList = [values[0], values[1], values[2], values[3], values[4], values[5]]
-                self.data.emit(valuesList)
-                await asyncio.sleep(0.2)
+
+                print(f"ax:{valuesList[0]}\n\
+ay:{valuesList[1]}\n\
+az:{valuesList[2]}\n\
+gx:{valuesList[3]}\n\
+gy:{valuesList[4]}\n\
+gz:{valuesList[5]}\n")
+
+                await asyncio.sleep(0.1)
+
+if __name__ == "__main__":
+    manager = BleCommunicationManager()
+    asyncio.run(manager._main())
