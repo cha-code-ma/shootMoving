@@ -1,5 +1,6 @@
-from numpy import std
+"""
 
+"""
 class shootDetector():
     ACCEL_TRESHOLD = 0.5
     GRAVITY_TRESHOLD = 0.75
