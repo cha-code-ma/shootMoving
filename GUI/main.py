@@ -8,24 +8,16 @@ Notities voor github pushing:
 dit is de start, geen implementatie, alleen basis voor PyQt5
 
 """
-import argparse
-import asyncio
-from bleak import BleakClient
-from bleak import BleakScanner
-
+from bleak import BleakClient, BleakScanner
 import logic.detectArduino, logic.detectShoot
 from GUI.window_ui import Ui_Form
 import sys
-import datetime
-import os
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
-import random
 from .mplwidget import MplWidget
-from statistics import mean, stdev
 from window_ui import *
 import matplotlib
 matplotlib.use("Qt5Agg")
@@ -90,7 +82,7 @@ class shootMovingUI(QMainWindow):
 
         #Shoot Detection:
         self.shootdetector = logic.detectShoot.shootDetector()
-        self.isShooting = True
+        self.isShooting = False
 
     def startFunction(self):
         self.bleComManager.start() # .start() start de thread, roept run() aan
@@ -135,6 +127,8 @@ class shootMovingUI(QMainWindow):
 
     def shootDetected(self):
         shot, accel = self.shootdetector.isShooting(self.allValues, self.time)
+        shot = not self.shootdetector.stopShooting(self.allValues, self.time, 4)
+
         if shot:
             self.isShooting = True
             self.ui.shootDetectionText.setPlainText(f"Is shooting: {accel}")
@@ -156,6 +150,12 @@ class shootMovingUI(QMainWindow):
 
     def timerEvent(self):
 
+        if self.allValues == [[0], [0], [0], [0], [0], [0]]:
+            self.isShooting = False
+            self.ui.shootDetectionText.setPlainText(f"Is NOT shooting")
+            self.ui.shootDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
+            return None
+
         self.shootDetected()
         #lastValues = self.chooseValuesIndex(-1)
 
@@ -169,51 +169,6 @@ class shootMovingUI(QMainWindow):
         self.ui.MplWidget.canvas.axes.figure.tight_layout()
         self.ui.MplWidget.canvas.axes.legend(loc= 'upper left')
         self.ui.MplWidget.canvas.draw()
-
-
-
-
-
-
-    def logging(self, fallType):
-        """
-        Logs a fall incident with date, time, max acceleration values and fall type.
-        """
-        if self._logDebug:
-            self._logDebug = not self._logDebug
-            self._logDebugTimer = 0
-        else:
-            return
-
-        amountFramesCheck = min(
-            min(len(self.allAccelValues[0]),
-                len(self.allAccelValues[1]),
-                len(self.allAccelValues[2])),
-            1000 // TIMER_INTERVAL_VALUE)
-
-        self._maxAcceleration = [[], [], []]
-        for i in range(3):
-            maxValue = 0
-            for frame in range(1, amountFramesCheck + 1):
-                if abs(self.allAccelValues[i][-frame]) > maxValue:
-                    maxValue = abs(self.allAccelValues[i][-frame])
-            self._maxAcceleration[i].append(maxValue)
-
-        date = datetime.datetime.now().date()
-        currentTime = datetime.datetime.now().time()
-        dateText = str(date.year).zfill(2) + ":" + str(date.month).zfill(2) + ":" + str(date.day).zfill(2)
-        currentTimeText = str(currentTime.hour).zfill(2) + ":" + \
-            str(currentTime.minute).zfill(2) + ":" + str(currentTime.second).zfill(2)
-
-        axText = round(self._maxAcceleration[0][0], 3)
-        ayText = round(self._maxAcceleration[1][0], 3)
-        azText = round(self._maxAcceleration[2][0], 3)
-
-        text = [dateText, currentTimeText, axText, ayText, azText, fallType]
-        self._log.append(text)
-        self._logModel.appendRow(QStandardItem(
-            f"Date:{text[0]} Time:{text[1]} | ax:{text[2]} ay:{text[3]} az:{text[4]} | Falltype: {text[5]}"))
-        print(self._log)
 
 
 if __name__ == "__main__":
