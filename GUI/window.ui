@@ -150,7 +150,7 @@ background-color: rgb(38, 162, 105);</string>
     </rect>
    </property>
   </widget>
-  <widget class="QPlainTextEdit" name="shootDetection">
+  <widget class="QPlainTextEdit" name="shootDetectionText">
    <property name="geometry">
     <rect>
      <x>440</x>

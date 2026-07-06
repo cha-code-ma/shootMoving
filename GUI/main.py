@@ -13,7 +13,7 @@ import asyncio
 from bleak import BleakClient
 from bleak import BleakScanner
 
-import logic.detectArduino
+import logic.detectArduino, logic.detectShoot
 from GUI.window_ui import Ui_Form
 import sys
 import datetime
@@ -88,6 +88,9 @@ class shootMovingUI(QMainWindow):
         self.bleComManager.data.connect(self.addValues)
         self.ui.buttonTest.clicked.connect(self.startFunction)
 
+        #Shoot Detection:
+        self.shootdetector = logic.detectShoot.shootDetector()
+        self.isShooting = True
 
     def startFunction(self):
         self.bleComManager.start() # .start() start de thread, roept run() aan
@@ -130,7 +133,16 @@ class shootMovingUI(QMainWindow):
         self.ui.buttonChooseStart.hide()
         self.ui.buttonChooseTest.hide()
 
-
+    def shootDetected(self):
+        shot, accel = self.shootdetector.isShooting(self.allValues, self.time)
+        if shot:
+            self.isShooting = True
+            self.ui.shootDetectionText.setPlainText(f"Is shooting: {accel}")
+            self.ui.shootDetectionText.setStyleSheet("background-color: rgb(0, 255, 0);")
+        else:
+            self.isShooting = False
+            self.ui.shootDetectionText.setPlainText(f"Is NOT shooting")
+            self.ui.shootDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
 
     def startButtonClicked(self):
             self.timer.start()
@@ -144,8 +156,9 @@ class shootMovingUI(QMainWindow):
 
     def timerEvent(self):
 
-        lastValues = self.chooseValuesIndex(-1)
-        print(f"lastValues:\n{lastValues}")
+        self.shootDetected()
+        #lastValues = self.chooseValuesIndex(-1)
+
         self.ui.MplWidget.canvas.axes.clear()
         self.ui.MplWidget.canvas.axes.set_ylim(-4, 4)
         self.ui.MplWidget.canvas.axes.plot(self.time, self.graphValues[0],'r',linewidth= 0.5, label = 'ax')
