@@ -26,7 +26,7 @@ Download en installeer Python via python.org. Vink tijdens installatie "Add Pyth
 Open Command Prompt of PowerShell (de terminal-programma's van Windows waarin je tekst-commando's uitvoert).
 
 4. Venv aanmaken:
-python -m venv venv
+python -m venv venv. This had to be done in the extracted zip folder you downloaded., with all the subfolders.
 
 5. Venv activeren:
 Command prompt:
