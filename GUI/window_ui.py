@@ -91,4 +91,4 @@ class Ui_Form(object):
         self.buttonChooseStart.setText(_translate("Form", "Start"))
         self.plainTextEdit.setPlainText(_translate("Form", "Current real state:"))
         self.plainTextEdit_2.setPlainText(_translate("Form", "ShootDetected State:"))
-from mplwidget import MplWidget
+from .mplwidget import MplWidget
