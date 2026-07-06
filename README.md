@@ -21,15 +21,19 @@ pip install pyautogui PyQt5 bleak matplotlib
 Hier is een samenvatting van alle stappen om je programma op Windows te draaien:
 1. Python installeren
 Download en installeer Python via python.org. Vink tijdens installatie "Add Python to PATH" aan (PATH is een systeeminstelling die aangeeft waar je terminal programma's zoals python kan vinden).
-2. Terminal openen
+
+3. Terminal openen
 Open Command Prompt of PowerShell (de terminal-programma's van Windows waarin je tekst-commando's uitvoert).
-3. Venv aanmaken:
+
+4. Venv aanmaken:
 python -m venv venv
-4. Venv activeren:
+
+5. Venv activeren:
 Command prompt:
 venv\Scripts\activate.bat
 powershell:
 venv\Scripts\Activate.ps1
+
 5.Pakketen instaleren:
 pip install pyautogui PyQt5 bleak matplotlib
 
