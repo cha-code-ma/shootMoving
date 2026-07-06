@@ -87,9 +87,6 @@ class shootMovingUI(QMainWindow):
 
         #HalfLife:
         self.halfLifeManager = halfLifeManager()
-        self.threadHalfLife = QThread()
-        self.halfLifeManager.moveToThread(self.threadHalfLife)
-        self.threadHalfLife.started.connect(self.halfLifeManager.shoot)
 
 
     def startFunction(self):
@@ -166,7 +163,7 @@ class shootMovingUI(QMainWindow):
 
         self.shootDetected()
         if self.isShooting:
-            self.threadHalfLife.start()
+            self.halfLifeManager.shoot()
         #lastValues = self.chooseValuesIndex(-1)
 
         self.ui.MplWidget.canvas.axes.clear()

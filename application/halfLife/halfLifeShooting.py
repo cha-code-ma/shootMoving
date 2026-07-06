@@ -7,8 +7,8 @@ In this file, we will try to shoot automatically in half-life.
 """
 import pyautogui
 from time import sleep
-from PyQt5.QtCore import QObject
-class halfLifeManager(QObject):
+
+class halfLifeManager():
 
 
     def shoot(self):
