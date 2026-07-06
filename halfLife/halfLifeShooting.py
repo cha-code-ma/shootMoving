@@ -17,8 +17,8 @@ class halfLifeManager(QObject):
         Xcenter = width // 2
         Ycenter = heigth // 2
         pyautogui.click(Xcenter, Ycenter)
-        sleep(0.1)
-        pyautogui.click(Xcenter, Ycenter)
+        #sleep(0.1)
+        #pyautogui.click(Xcenter, Ycenter)
 
     def test(self):
         width, heigth = pyautogui.size()
