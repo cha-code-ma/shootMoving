@@ -8,12 +8,13 @@ Notities voor github pushing:
 dit is de start, geen implementatie, alleen basis voor PyQt5
 
 """
-from bleak import BleakClient, BleakScanner
+
 import logic.detectArduino, logic.detectShoot
 from GUI.window_ui import Ui_Form
+from halfLife.halfLifeShooting import halfLifeManager
 import sys
 from PyQt5.QtCore import Qt
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, QThread
 from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
@@ -83,6 +84,13 @@ class shootMovingUI(QMainWindow):
         #Shoot Detection:
         self.shootdetector = logic.detectShoot.shootDetector()
         self.isShooting = False
+
+        #HalfLife:
+        self.halfLifeManager = halfLifeManager()
+        self.threadHalfLife = QThread()
+        self.halfLifeManager.moveToThread(self.threadHalfLife)
+        self.threadHalfLife.started.connect(self.halfLifeManager.shoot)
+
 
     def startFunction(self):
         self.bleComManager.start() # .start() start de thread, roept run() aan
@@ -157,6 +165,8 @@ class shootMovingUI(QMainWindow):
             return None
 
         self.shootDetected()
+        if self.isShooting:
+            self.threadHalfLife.start()
         #lastValues = self.chooseValuesIndex(-1)
 
         self.ui.MplWidget.canvas.axes.clear()
