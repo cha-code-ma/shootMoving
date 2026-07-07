@@ -127,3 +127,19 @@ class shootDetector():
             f"Date:{text[0]} Time:{text[1]} | ax:{text[2]} ay:{text[3]} az:{text[4]} | Falltype: {text[5]}"))
         print(self._log)
         """
+"""
+def csvSave(self):
+with open(self.csv_filename, 'w') as f:
+    f.write("t,x,y,z\n")
+    for t, ax, ay, az in zip(self.listAllT, self.listAllAx, self.listAllAy, self.listAllAz):
+        f.write(f"{round(t, 2)},{round(ax, 2)},{round(ay, 2)},{round(az, 2)}\n")
+"""
+"""
+        #Logging:
+        self._log = []
+        self._logModel = QStandardItemModel()
+        self.ui.logList.setModel(self._logModel)
+        self._logDebug = True
+        self._logDebugTimer = -1
+        self._csv_filename = None
+"""

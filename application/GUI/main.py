@@ -29,10 +29,7 @@ TIMER_INTERVAL_VALUE = 200
 AMOUNT_OF_ARDUINO_VALUES = 7
 AMOUNT_OF_MOMENTS = 100
 AMOUNT_OF_GRAPH_MOMENTS = 30
-ARDUINO_LOCAL_NAME = "BLE-AR48"  #Use the correct Arduino number in this identifier!!
-LED_UUID = "19b10001-e8f2-537e-4f6c-d104768a1214"
-on_value = bytearray([0x01])
-off_value = bytearray([0x00])
+
 
 class shootMovingUI(QMainWindow):
     def __init__(self, *args):
@@ -67,14 +64,6 @@ class shootMovingUI(QMainWindow):
         #UI logic:
         self.ui.buttonChooseStart.clicked.connect(self.demonstrationFunction)
         self.ui.buttonChooseTest.clicked.connect(self.demonstrationFunction)
-
-        #Logging:
-        self._log = []
-        self._logModel = QStandardItemModel()
-        self.ui.logList.setModel(self._logModel)
-        self._logDebug = True
-        self._logDebugTimer = -1
-        self._csv_filename = None
 
         #BLE communication:
         self.bleComManager = logic.detectArduino.BleCommunicationManager()
@@ -145,13 +134,6 @@ class shootMovingUI(QMainWindow):
 
     def startButtonClicked(self):
             self.timer.start()
-
-    def csvSave(self):
-        with open(self.csv_filename, 'w') as f:
-            f.write("t,x,y,z\n")
-            for t, ax, ay, az in zip(self.listAllT, self.listAllAx, self.listAllAy, self.listAllAz):
-                f.write(f"{round(t, 2)},{round(ax, 2)},{round(ay, 2)},{round(az, 2)}\n")
-
 
     def timerEvent(self):
 
