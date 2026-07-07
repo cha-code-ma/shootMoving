@@ -12,7 +12,7 @@ class shootDetector():
             return True
         return False
 
-    def stopShooting(self, valuesList, timeList, amountSamples = 6) -> bool:
+    def stopShooting(self, valuesList, timeList, amountSamples = 3) -> bool:
         accelList, gyroList = valuesList[0:3], valuesList[3:7]
         axList = accelList[0][-amountSamples:]
         ayList = accelList[1][-amountSamples:]

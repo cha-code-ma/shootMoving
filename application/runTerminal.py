@@ -83,7 +83,7 @@ class shootMoving():
 
     def shootDetected(self):
         shot, accel = self.shootdetector.isShooting(self.allValues, self.time)
-        shot = not self.shootdetector.stopShooting(self.allValues, self.time, 4)
+        shot = not self.shootdetector.stopShooting(self.allValues, self.time)
 
         if shot:
             self.isShooting = True
