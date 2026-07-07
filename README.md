@@ -26,12 +26,13 @@ Download en installeer Python via python.org. Vink tijdens installatie "Add Pyth
 2.Download this github in a zip-file and extract this zip-file.
 
 3. Terminal openen
-Open Command Prompt (de terminal-programma van Windows waarin je tekst-commando's uitvoert).
+Open Command Prompt as administrator. and because you now start at C:Windows\System32, you need to do:
+cd C:\Users\<your-username>\<path to shootmoving-main>
 
-4. Venv aanmaken:
+5. Venv aanmaken:
 python -m venv venv. Dit moet gedaan worden in de `application` folder.
 
-5. Venv activeren:
+6. Venv activeren:
 Command prompt:
 venv\Scripts\activate.bat
 
