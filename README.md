@@ -1,5 +1,6 @@
 # shootMoving
 In this repository, we will use the Adruino Nano IoT microchip and Python to shoot in the game Half-Life, whenever the person moves the adruino back and forth (shooting motion).
+The way shooting is happening is by the python library pyautogui, so this means it just does a mouse click in the center of your sceen, whenever you move the arduino in a shooting motion.
 
 
 ## How to start?
@@ -22,24 +23,25 @@ Hier is een samenvatting van alle stappen om je programma op Windows te draaien:
 1. Python installeren
 Download en installeer Python via python.org. Vink tijdens installatie "Add Python to PATH" aan (PATH is een systeeminstelling die aangeeft waar je terminal programma's zoals python kan vinden).
 
+2.Download this github in a zip-file and extract this zip-file.
+
 3. Terminal openen
-Open Command Prompt of PowerShell (de terminal-programma's van Windows waarin je tekst-commando's uitvoert).
+Open Command Prompt (de terminal-programma van Windows waarin je tekst-commando's uitvoert).
 
 4. Venv aanmaken:
-python -m venv venv. This had to be done in the extracted zip folder you downloaded., with all the subfolders.
+python -m venv venv. Dit moet gedaan worden in de `application` folder.
 
 5. Venv activeren:
 Command prompt:
 venv\Scripts\activate.bat
-powershell:
-venv\Scripts\Activate.ps1
 
 5.Pakketen instaleren:
 pip install pyautogui PyQt5 bleak matplotlib
 
 ### Now run this program:
 Download the `application` folder and in the terminal, run:
-python -m GUI.main
+-python -m GUI.main yesgui     --if you want a pyqt5 gui
+-python -m GUI.main nogui      --if you only want to use the terminal
 
-And you will see a PyQt5 window.
+good luck!
 
