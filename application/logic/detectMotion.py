@@ -1,0 +1,262 @@
+"""
+
+"""
+from enum import Enum
+TIMER_INTERVAL_VALUE = 100
+
+class direction(Enum):
+    LEFT = -1
+    FORWARD = 0
+    RIGHT = 1
+
+class turningStatus(Enum):
+    TURNING = 1
+    NO_TURNING = 0
+
+class blocking(Enum):
+    NO_BLOCK = 1
+    BLOCK = 0
+
+class movementDetector():
+    ACCEL_TRESHOLD = 0.5
+    GRAVITY_TRESHOLD = 0.75
+    BLOCK_DURATION = 0.3
+
+    def __init__(self):
+        #turning variables:
+        self.blocked = blocking.NO_BLOCK
+        self.blockedStartTime = 0
+        self.highZGyroValue = None
+        self.lowZGyroValue = None
+        self.angle = direction.FORWARD
+        self.turningStatus = turningStatus.NO_TURNING
+        self.speed = 1
+        self.lastRegisteredTurnTime = 0
+
+    def low_varation(self, list, value=0, band=0.3, precantage=0.8):
+        inBandList = [x for x in list if -band + value <= x <= band + value]
+        x = len(inBandList)/len(list)
+        if x >= precantage:
+            return True
+        return False
+
+    def stopShooting(self, valuesList, timeList, amountSamples = 3) -> bool:
+        accelList, gyroList = valuesList[0:3], valuesList[3:7]
+        axList = accelList[0][-amountSamples:]
+        ayList = accelList[1][-amountSamples:]
+        azList = accelList[2][-amountSamples:]
+        if not self.check(axList, amountSamples):
+            return False
+        axAverage = self.averageInList(axList, -amountSamples)
+        ayAverage = self.averageInList(ayList, -amountSamples)
+        azAverage = self.averageInList(azList, -amountSamples)
+
+        if self.low_varation(axList, axAverage) and \
+            self.low_varation(ayList, ayAverage) and \
+            self.low_varation(azList, azAverage):
+            return True
+        return False
+
+
+    def isShooting(self, valuesList, timeList, amountSamples = 10) -> tuple[bool, float]:
+
+        accelList, gyroList = valuesList[0:3], valuesList[3:7]
+        axList = accelList[0][-amountSamples:]
+        ayList = accelList[1][-amountSamples:]
+        azList = accelList[2][-amountSamples:]
+        if not self.check(axList, amountSamples):
+            return False, 0
+        axAverage = self.averageInList(axList, -amountSamples)
+        ayAverage = self.averageInList(ayList, -amountSamples)
+        azAverage = self.averageInList(azList, -amountSamples)
+        checks = [(axAverage, [ayList, azList]),
+                   (ayAverage, [axList, azList]),
+                   (azAverage, [axList, ayList])]
+
+        for av, lists in checks:
+            for aList in lists:
+                shot, strength = self.fluctuation(aList, timeList, self.ACCEL_TRESHOLD, -amountSamples)
+                if  shot: #av >= self.GRAVITY_TRESHOLD and
+                    return shot, strength
+        return False, 0
+
+    def turning(self, valuesList: list, timeList: list, amountSamples = 10)-> tuple[turningStatus, direction, float]:
+        if len(valuesList[3]) < 2:
+            return turningStatus.NO_TURNING, direction.FORWARD, 1
+
+        currentTime = timeList[-1]
+        if self.blocked == blocking.BLOCK and currentTime - self.blockStartTime >= self.BLOCK_DURATION:
+            self.blocked = blocking.NO_BLOCK
+
+        accelList, gyroList = valuesList[0:3], valuesList[3:7]
+        timeList = timeList[-amountSamples:]
+        gxList = gyroList[0][-amountSamples:]
+        gyList = gyroList[1][-amountSamples:]
+        gzList = gyroList[2][-amountSamples:]
+        ZHighValues = [[x, gzList.index(x)] for x in gzList if x > 55]
+        ZlowValues = [[x, gzList.index(x)] for x in gzList if x < -55]
+        if len(ZHighValues) > 0:
+            indexHighValues = list(zip(*ZHighValues))[1]
+            recentHighIndex = max(indexHighValues)
+        if len(ZlowValues) > 0:
+            indexLowValues = list(zip(*ZlowValues))[1]
+            recentLowIndex = max(indexLowValues)
+
+
+
+        if len(ZHighValues) > 0 and len(ZlowValues) > 0:
+            if self.turningStatus == turningStatus.TURNING:
+                if self.angle == direction.LEFT and \
+                    recentLowIndex > recentHighIndex and \
+                         timeList[recentLowIndex] > self.lastRegisteredTurnTime:
+
+                    self.turningStatus = turningStatus.NO_TURNING
+                    self.angle = direction.FORWARD
+                    return self.turningStatus, self.angle, self.speed
+
+                elif self.angle == direction.RIGHT and \
+                    recentHighIndex > recentLowIndex and  \
+                        timeList[recentHighIndex] > self.lastRegisteredTurnTime:
+
+                    self.turningStatus = turningStatus.NO_TURNING
+                    self.angle = direction.FORWARD
+                    return self.turningStatus, self.angle, self.speed
+            else: #self.turningStatus == turningStatus.NO_TURNING:
+                if self.blocked == blocking.NO_BLOCK:
+                    if recentHighIndex > recentLowIndex and timeList[recentHighIndex] > self.lastRegisteredTurnTime:
+                        self.lastRegisteredTurnTime = timeList[recentHighIndex]
+                        self.turningStatus = turningStatus.TURNING
+                        self.angle = direction.LEFT
+                        self.blocked = blocking.BLOCK
+                        self.blockStartTime = currentTime
+                        return self.turningStatus, self.angle, self.speed
+                    elif recentLowIndex > recentHighIndex and timeList[recentLowIndex] > self.lastRegisteredTurnTime:
+                        self.lastRegisteredTurnTime = timeList[recentLowIndex]
+                        self.turningStatus = turningStatus.TURNING
+                        self.angle = direction.RIGHT
+                        self.blocked = blocking.BLOCK
+                        self.blockStartTime = currentTime
+                        return self.turningStatus, self.angle, self.speed
+                    else:
+                        pass
+                else:
+                    pass
+
+        elif len(ZHighValues) > 0:
+            if self.turningStatus == turningStatus.NO_TURNING and self.blocked == blocking.NO_BLOCK:
+                self.turningStatus = turningStatus.TURNING
+                self.angle = direction.LEFT
+                self.blocked = blocking.BLOCK
+                self.blockStartTime = currentTime
+                self.lastRegisteredTurnTime = timeList[recentHighIndex]
+                return self.turningStatus , self.angle, self.speed
+
+        elif len(ZlowValues) > 0:
+            if self.turningStatus == turningStatus.NO_TURNING and self.blocked == blocking.NO_BLOCK:
+                self.turningStatus = turningStatus.TURNING
+                self.angle = direction.RIGHT
+                self.blocked = blocking.BLOCK
+                self.blockStartTime = currentTime
+                self.lastRegisteredTurnTime = timeList[recentLowIndex]
+                return self.turningStatus , self.angle, self.speed
+
+        else:
+            if self.turningStatus != turningStatus.NO_TURNING:
+                self.turningStatus = turningStatus.NO_TURNING
+                self.blocked = blocking.NO_BLOCK
+            return self.turningStatus, self.angle, self.speed
+
+        return self.turningStatus, self.angle, self.speed
+
+
+
+    def averageInList(self, list, startIndex):
+        if not self.check(list, startIndex):
+            return 0
+
+        if startIndex < 0:
+            startIndex = len(list) + startIndex
+
+
+        sum = 0
+        for i in range(startIndex, len(list)):
+            sum += list[i]
+        sum = sum/(len(list) - startIndex)
+
+        return sum
+
+    def fluctuation(self, list, time, treshold, startIndex) -> tuple[bool, float]:
+        if not self.check(list, startIndex):
+            return False, 0
+
+        if startIndex < 0:
+            startIndex = len(list) + startIndex
+        average = sum(list[-startIndex:]) / len(list)
+        highValues = [x for x in list[-startIndex:] if x >= average + self.ACCEL_TRESHOLD]
+        lowValues = [x for x in list[-startIndex:] if x <= average - self.ACCEL_TRESHOLD]
+        if len(highValues) > 1 and len(lowValues) > 1:
+            return True, (self.averageInList(highValues, 0) + self.averageInList(lowValues, 0) ) / 2
+        return False, 0
+
+    def check(self, list, startIndex) -> bool:
+        if len(list) == 0 or len(list) < abs(startIndex):
+            return False
+        return True
+
+    """
+    def logging(self, fallType):
+
+        Logs a fall incident with date, time, max acceleration values and fall type.
+
+        if self._logDebug:
+            self._logDebug = not self._logDebug
+            self._logDebugTimer = 0
+        else:
+            return
+
+        amountFramesCheck = min(
+            min(len(self.allAccelValues[0]),
+                len(self.allAccelValues[1]),
+                len(self.allAccelValues[2])),
+            1000 // TIMER_INTERVAL_VALUE)
+
+        self._maxAcceleration = [[], [], []]
+        for i in range(3):
+            maxValue = 0
+            for frame in range(1, amountFramesCheck + 1):
+                if abs(self.allAccelValues[i][-frame]) > maxValue:
+                    maxValue = abs(self.allAccelValues[i][-frame])
+            self._maxAcceleration[i].append(maxValue)
+
+        date = datetime.datetime.now().date()
+        currentTime = datetime.datetime.now().time()
+        dateText = str(date.year).zfill(2) + ":" + str(date.month).zfill(2) + ":" + str(date.day).zfill(2)
+        currentTimeText = str(currentTime.hour).zfill(2) + ":" + \
+            str(currentTime.minute).zfill(2) + ":" + str(currentTime.second).zfill(2)
+
+        axText = round(self._maxAcceleration[0][0], 3)
+        ayText = round(self._maxAcceleration[1][0], 3)
+        azText = round(self._maxAcceleration[2][0], 3)
+
+        text = [dateText, currentTimeText, axText, ayText, azText, fallType]
+        self._log.append(text)
+        self._logModel.appendRow(QStandardItem(
+            f"Date:{text[0]} Time:{text[1]} | ax:{text[2]} ay:{text[3]} az:{text[4]} | Falltype: {text[5]}"))
+        print(self._log)
+        """
+"""
+def csvSave(self):
+with open(self.csv_filename, 'w') as f:
+    f.write("t,x,y,z\n")
+    for t, ax, ay, az in zip(self.listAllT, self.listAllAx, self.listAllAy, self.listAllAz):
+        f.write(f"{round(t, 2)},{round(ax, 2)},{round(ay, 2)},{round(az, 2)}\n")
+"""
+"""
+        #Logging:
+        self._log = []
+        self._logModel = QStandardItemModel()
+        self.ui.logList.setModel(self._logModel)
+        self._logDebug = True
+        self._logDebugTimer = -1
+        self._csv_filename = None
+"""

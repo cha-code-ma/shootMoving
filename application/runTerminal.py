@@ -4,17 +4,24 @@ Gemaakt door: Github: cha-code-ma
 """
 
 
-import logic.detectArduinoNoGUI, logic.detectShoot
+import logic.detectArduinoNoGUI, logic.detectMotion
 from halfLife.halfLifeShooting import halfLifeManager
 from time import sleep
 import threading
 import queue
-
+from enum import Enum
 
 AMOUNT_OF_ARDUINO_VALUES = 7
 AMOUNT_OF_MOMENTS = 100
 AMOUNT_OF_GRAPH_MOMENTS = 30
 
+class direction(Enum):
+    LEFT = -1
+    RIGHT = 1
+
+class turningStatus(Enum):
+    TURNING = 1
+    NO_TURNING = 0
 
 class shootMoving():
     def __init__(self):
@@ -33,10 +40,10 @@ class shootMoving():
 
         self.q = queue.Queue() #om dezeflde data te kunnen aanpassen zonder racing condition
         self.stopEvent = threading.Event() # simpel vlaggetje om de thread te laten stoppen
-        #self.thread = threading.Thread(target=self.addValues, args=(self.q, self.stopEvent))
+        self.thread = threading.Thread(target=self.addValues, args=(self.q, self.stopEvent))
 
         #Shoot Detection:
-        self.shootdetector = logic.detectShoot.shootDetector()
+        self.movementDetector = logic.detectMotion.movementDetector()
         self.isShooting = False
 
         #HalfLife:
@@ -82,23 +89,27 @@ class shootMoving():
         return list
 
     def shootDetected(self):
-        shot, accel = self.shootdetector.isShooting(self.allValues, self.time)
-        shot = not self.shootdetector.stopShooting(self.allValues, self.time)
+        shot, accel = self.movementDetector.isShooting(self.allValues, self.time)
+        shot = not self.movementDetector.stopShooting(self.allValues, self.time)
+        turning, direc, _ = self.movementDetector.turning(self.allValues, self.time)
 
         if shot:
             self.isShooting = True
-            print(f"Is shooting: {accel}")
+            #print(f"Is shooting: {accel}")
 
         else:
             self.isShooting = False
-            print(f"Is NOT shooting")
+            #print(f"Is NOT shooting")
 
+        if turning == turningStatus.TURNING:
+            print("turning")
+            self.halfLifeManager.turn(direc)
 
     def loopEvent(self):
         try:
 
             data = self.q.get(timeout=0.05)
-            print(f"data:{data}")
+            #print(f"data:{data}")
             self.addValues(data)
 
         except queue.Empty:
@@ -106,7 +117,7 @@ class shootMoving():
 
         if self.allValues == [[0], [0], [0], [0], [0], [0]]:
             self.isShooting = False
-            print("is NOT shooting")
+
             return None
 
         self.shootDetected()

@@ -46,21 +46,6 @@ class BleCommunicationManager():
         return None, None
 
 
-    async def runmain(self, d, a):
-        async with BleakClient(d.address) as client:
-            print("Connected")
-
-            for i in range(10):
-                print("LED on")
-                await client.write_gatt_char(LED_UUID, on_value)
-                await asyncio.sleep(1)
-
-                print("LED off")
-                await client.write_gatt_char(LED_UUID, off_value)
-                await asyncio.sleep(1)
-
-            print("Done")
-
     async def _main(self, q: queue.Queue, stop_event: threading.Event):
         parser = argparse.ArgumentParser()
 

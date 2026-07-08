@@ -9,10 +9,11 @@ dit is de start, geen implementatie, alleen basis voor PyQt5
 
 """
 
-import logic.detectArduino, logic.detectShoot
+import logic.detectArduino, logic.detectMotion
 from GUI.window_ui import Ui_Form
 from halfLife.halfLifeShooting import halfLifeManager
 import sys
+from enum import Enum
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QTimer, QThread
 from PyQt5.QtWidgets import *
@@ -25,11 +26,18 @@ matplotlib.use("Qt5Agg")
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
-TIMER_INTERVAL_VALUE = 200
+TIMER_INTERVAL_VALUE = 100
 AMOUNT_OF_ARDUINO_VALUES = 7
 AMOUNT_OF_MOMENTS = 100
 AMOUNT_OF_GRAPH_MOMENTS = 30
 
+class direction(Enum):
+    LEFT = -1
+    RIGHT = 1
+
+class turningStatus(Enum):
+    TURNING = 1
+    NO_TURNING = 0
 
 class shootMovingUI(QMainWindow):
     def __init__(self, *args):
@@ -71,7 +79,7 @@ class shootMovingUI(QMainWindow):
         self.ui.buttonTest.clicked.connect(self.startFunction)
 
         #Shoot Detection:
-        self.shootdetector = logic.detectShoot.shootDetector()
+        self.movementDetector = logic.detectMotion.movementDetector()
         self.isShooting = False
 
         #HalfLife:
@@ -120,8 +128,9 @@ class shootMovingUI(QMainWindow):
         self.ui.buttonChooseTest.hide()
 
     def shootDetected(self):
-        shot, accel = self.shootdetector.isShooting(self.allValues, self.time)
-        shot = not self.shootdetector.stopShooting(self.allValues, self.time)
+        shot, accel = self.movementDetector.isShooting(self.allValues, self.time)
+        shot = not self.movementDetector.stopShooting(self.allValues, self.time)
+        turning, direc, _ = self.movementDetector.turning(self.allValues, self.time)
 
         if shot:
             self.isShooting = True
@@ -131,6 +140,11 @@ class shootMovingUI(QMainWindow):
             self.isShooting = False
             self.ui.shootDetectionText.setPlainText(f"Is NOT shooting")
             self.ui.shootDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
+
+        if turning == turningStatus.TURNING:
+            self.halfLifeManager.turn(direc)
+
+
 
     def startButtonClicked(self):
             self.timer.start()
@@ -144,15 +158,19 @@ class shootMovingUI(QMainWindow):
             return None
 
         self.shootDetected()
+
         if self.isShooting:
             self.halfLifeManager.shoot()
         #lastValues = self.chooseValuesIndex(-1)
-
+        print(f"{self.allValues[3][-1]}, {self.allValues[4][-1]}, {self.allValues[5][-1]}")
         self.ui.MplWidget.canvas.axes.clear()
-        self.ui.MplWidget.canvas.axes.set_ylim(-4, 4)
+        self.ui.MplWidget.canvas.axes.set_ylim(-50, 50)
         self.ui.MplWidget.canvas.axes.plot(self.time, self.graphValues[0],'r',linewidth= 0.5, label = 'ax')
         self.ui.MplWidget.canvas.axes.plot(self.time, self.graphValues[1],'g',linewidth= 0.5, label = 'ay')
         self.ui.MplWidget.canvas.axes.plot(self.time, self.graphValues[2],'b',linewidth= 0.5, label = 'az')
+        self.ui.MplWidget.canvas.axes.plot(self.time, self.graphValues[3],'r',linewidth= 0.5, label = 'gx', linestyle = '--')
+        self.ui.MplWidget.canvas.axes.plot(self.time, self.graphValues[4],'g',linewidth= 0.5, label = 'gy', linestyle = '--')
+        self.ui.MplWidget.canvas.axes.plot(self.time, self.graphValues[5],'b',linewidth= 0.5, label = 'gz', linestyle = '--')
         self.ui.MplWidget.canvas.axes.set_xlabel("tijd (s)")
         self.ui.MplWidget.canvas.axes.set_ylabel("acceleration (9,81 m/s^2)")
         self.ui.MplWidget.canvas.axes.figure.tight_layout()
