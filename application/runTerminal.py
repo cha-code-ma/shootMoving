@@ -5,7 +5,7 @@ Gemaakt door: Github: cha-code-ma
 
 
 import logic.detectArduinoNoGUI, logic.detectMotion
-from logic.detectMotion import turningStatus, direction
+from logic.detectMotion import turningStatus, walkingStatus
 from halfLife.halfLifeShooting import halfLifeManager
 from time import sleep
 import threading
@@ -86,7 +86,7 @@ class shootMoving():
         shot, accel = self.movementDetector.isShooting(self.allValues, self.time)
         shot = not self.movementDetector.stopShooting(self.allValues, self.time)
         turning, direc, _ = self.movementDetector.turning(self.allValues, self.time)
-
+        walking, walkSpeed = self.movementDetector.walking(self.allValues, self.time)
         if shot:
             self.isShooting = True
             #print(f"Is shooting: {accel}")
@@ -102,6 +102,11 @@ class shootMoving():
             print("turning")
 
             self.halfLifeManager.turn(direc)
+
+        if walking != walkingStatus.STANDING:
+            print(f"walking: {walking}")
+            self.halfLifeManager.walk(walking, walkSpeed)
+
 
     def loopEvent(self):
         try:

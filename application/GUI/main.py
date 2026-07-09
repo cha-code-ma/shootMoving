@@ -10,6 +10,7 @@ dit is de start, geen implementatie, alleen basis voor PyQt5
 """
 
 import logic.detectArduino, logic.detectMotion
+from logic.detectMotion import direction, turningStatus, walkingStatus
 from GUI.window_ui import Ui_Form
 from halfLife.halfLifeShooting import halfLifeManager
 import sys
@@ -31,13 +32,7 @@ AMOUNT_OF_ARDUINO_VALUES = 7
 AMOUNT_OF_MOMENTS = 100
 AMOUNT_OF_GRAPH_MOMENTS = 30
 
-class direction(Enum):
-    LEFT = -1
-    RIGHT = 1
 
-class turningStatus(Enum):
-    TURNING = 1
-    NO_TURNING = 0
 
 class shootMovingUI(QMainWindow):
     def __init__(self, *args):
@@ -135,6 +130,7 @@ class shootMovingUI(QMainWindow):
         shot, accel = self.movementDetector.isShooting(self.allValues, self.time)
         shot = not self.movementDetector.stopShooting(self.allValues, self.time)
         turning, direc, _ = self.movementDetector.turning(self.allValues, self.time)
+        walking, walkSpeed = self.movementDetector.walking(self.allValues, self.time)
 
         if shot:
             self.isShooting = True
@@ -149,7 +145,9 @@ class shootMovingUI(QMainWindow):
             print(f"turning: {direc}")
             self.halfLifeManager.turn(direc)
 
-
+        if walking != walkingStatus.STANDING:
+            print(f"walking: {walking}")
+            self.halfLifeManager.walk(walking, walkSpeed)
 
     def startButtonClicked(self):
             self.timer.start()

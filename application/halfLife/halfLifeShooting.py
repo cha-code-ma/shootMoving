@@ -9,18 +9,33 @@ import threading
 import pyautogui
 from time import sleep
 from enum import Enum
-class direction(Enum):
-    LEFT = -1
-    RIGHT = 1
+from logic.detectMotion import direction, walkingStatus
 
 class halfLifeManager():
     shootLock = threading.Lock()
     turnLock = threading.Lock()
+    walkLock = threading.Lock()
 
     def __init__(self):
         self.width, self.heigth = pyautogui.size()
         self.Xcenter = self.width // 2
         self.Ycenter = self.heigth // 2
+
+
+    def walk(self, direct, speed):
+        t = threading.Thread(target = self.walk_thread)
+        t.start()
+
+    def walk_thread(self, direct, speed):
+        with self.walkLock:
+            if direct == walkingStatus.FORWARD:
+                pyautogui.keyDown('w')
+                sleep(0.5)
+                pyautogui.keyUp('w')
+            elif direct == walkingStatus.BACKWARD:
+                pyautogui.keyDown('s')
+                sleep(0.5)
+                pyautogui.keyUp('s')
 
 
     def shoot(self):
@@ -29,7 +44,6 @@ class halfLifeManager():
 
     def shoot_thread(self):
         with self.shootLock:
-            print("shooting")
             pyautogui.click(self.Xcenter, self.Ycenter)
             sleep(0.050)
             pyautogui.click(self.Xcenter, self.Ycenter)
@@ -38,14 +52,13 @@ class halfLifeManager():
         t = threading.Thread(target=self.turn_thread, args=[dir])
         t.start()
 
-    def turn_thread(self, dit:direction):
+    def turn_thread(self, direct:direction):
         with self.turnLock:
-            print("turning")
-            if dit == direction.LEFT:
+            if direct == direction.LEFT:
                 pyautogui.moveTo(self.Xcenter, self.Ycenter)
                 pyautogui.dragRel(-self.Xcenter// 5, 0, duration=0.1)
                 pyautogui.moveTo(self.Xcenter, self.Ycenter)
-            if dit == direction.RIGHT:
+            if direct == direction.RIGHT:
                 pyautogui.moveTo(self.Xcenter, self.Ycenter)
                 pyautogui.dragRel(self.Xcenter// 5, 0, duration=0.1)
                 pyautogui.moveTo(self.Xcenter, self.Ycenter)
