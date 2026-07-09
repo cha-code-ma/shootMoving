@@ -2,7 +2,7 @@
 
 """
 from enum import Enum
-TIMER_INTERVAL_VALUE = 100
+
 
 class direction(Enum):
     LEFT = -1
@@ -18,9 +18,10 @@ class blocking(Enum):
     BLOCK = 0
 
 class movementDetector():
-    ACCEL_TRESHOLD = 0.5
+    ACCEL_TRESHOLD = 0.8
     GRAVITY_TRESHOLD = 0.75
-    BLOCK_DURATION = 0.3
+    BLOCK_DURATION = 0.9
+    TURNING_TRESHOLD = 100
 
     def __init__(self):
         #turning variables:
@@ -40,7 +41,7 @@ class movementDetector():
             return True
         return False
 
-    def stopShooting(self, valuesList, timeList, amountSamples = 3) -> bool:
+    def stopShooting(self, valuesList, timeList, amountSamples = 2) -> bool:
         accelList, gyroList = valuesList[0:3], valuesList[3:7]
         axList = accelList[0][-amountSamples:]
         ayList = accelList[1][-amountSamples:]
@@ -80,94 +81,96 @@ class movementDetector():
                     return shot, strength
         return False, 0
 
-    def turning(self, valuesList: list, timeList: list, amountSamples = 10)-> tuple[turningStatus, direction, float]:
-        if len(valuesList[3]) < 2:
-            return turningStatus.NO_TURNING, direction.FORWARD, 1
-
+    def turning(self, valuesList: list, timeList: list, amountSamples=10) -> tuple[turningStatus, direction, float]:
         currentTime = timeList[-1]
-        if self.blocked == blocking.BLOCK and currentTime - self.blockStartTime >= self.BLOCK_DURATION:
-            self.blocked = blocking.NO_BLOCK
+        if not currentTime:
+            currentTime = 0
 
         accelList, gyroList = valuesList[0:3], valuesList[3:7]
-        timeList = timeList[-amountSamples:]
-        gxList = gyroList[0][-amountSamples:]
-        gyList = gyroList[1][-amountSamples:]
         gzList = gyroList[2][-amountSamples:]
-        ZHighValues = [[x, gzList.index(x)] for x in gzList if x > 55]
-        ZlowValues = [[x, gzList.index(x)] for x in gzList if x < -55]
-        if len(ZHighValues) > 0:
-            indexHighValues = list(zip(*ZHighValues))[1]
-            recentHighIndex = max(indexHighValues)
-        if len(ZlowValues) > 0:
-            indexLowValues = list(zip(*ZlowValues))[1]
-            recentLowIndex = max(indexLowValues)
 
+        if self.blocked == blocking.NO_BLOCK:
+            ZHighValues = [[x, i] for i, x in enumerate(gzList) if x > self.TURNING_TRESHOLD]
+            ZlowValues = [[x, i] for i, x in enumerate(gzList) if x < -self.TURNING_TRESHOLD]
 
+            if len(ZHighValues) > 0:
+                indexHighValues = list(zip(*ZHighValues))[1]
+                recentHighIndex = max(indexHighValues)
+            if len(ZlowValues) > 0:
+                indexLowValues = list(zip(*ZlowValues))[1]
+                recentLowIndex = max(indexLowValues)
 
-        if len(ZHighValues) > 0 and len(ZlowValues) > 0:
-            if self.turningStatus == turningStatus.TURNING:
-                if self.angle == direction.LEFT and \
-                    recentLowIndex > recentHighIndex and \
-                         timeList[recentLowIndex] > self.lastRegisteredTurnTime:
-
-                    self.turningStatus = turningStatus.NO_TURNING
-                    self.angle = direction.FORWARD
-                    return self.turningStatus, self.angle, self.speed
-
-                elif self.angle == direction.RIGHT and \
-                    recentHighIndex > recentLowIndex and  \
-                        timeList[recentHighIndex] > self.lastRegisteredTurnTime:
-
-                    self.turningStatus = turningStatus.NO_TURNING
-                    self.angle = direction.FORWARD
-                    return self.turningStatus, self.angle, self.speed
-            else: #self.turningStatus == turningStatus.NO_TURNING:
-                if self.blocked == blocking.NO_BLOCK:
-                    if recentHighIndex > recentLowIndex and timeList[recentHighIndex] > self.lastRegisteredTurnTime:
-                        self.lastRegisteredTurnTime = timeList[recentHighIndex]
-                        self.turningStatus = turningStatus.TURNING
+            if len(ZHighValues) > 0 and len(ZlowValues) > 0:
+                if recentLowIndex > recentHighIndex:
+                    if timeList[-amountSamples:][recentLowIndex] <= self.lastRegisteredTurnTime:
+                        self.angle = direction.FORWARD
+                        self.turningStatus = turningStatus.NO_TURNING
+                    else:
                         self.angle = direction.LEFT
                         self.blocked = blocking.BLOCK
-                        self.blockStartTime = currentTime
-                        return self.turningStatus, self.angle, self.speed
-                    elif recentLowIndex > recentHighIndex and timeList[recentLowIndex] > self.lastRegisteredTurnTime:
-                        self.lastRegisteredTurnTime = timeList[recentLowIndex]
+                        self.blockedStartTime = currentTime
                         self.turningStatus = turningStatus.TURNING
-                        self.angle = direction.RIGHT
-                        self.blocked = blocking.BLOCK
-                        self.blockStartTime = currentTime
-                        return self.turningStatus, self.angle, self.speed
+                        self.lastRegisteredTurnTime = currentTime
+                elif recentHighIndex > recentLowIndex:
+                    if timeList[-amountSamples:][recentHighIndex] <= self.lastRegisteredTurnTime:
+                        self.angle = direction.FORWARD
+                        self.turningStatus = turningStatus.NO_TURNING
                     else:
-                        pass
+                        self.angle = direction.RIGHT
+                        self.blockedStartTime = currentTime
+                        self.blocked = blocking.BLOCK
+                        self.turningStatus = turningStatus.TURNING
+                        self.lastRegisteredTurnTime = currentTime
+
+            elif len(ZHighValues) > 0:
+                if timeList[-amountSamples:][recentHighIndex] <= self.lastRegisteredTurnTime:
+                    self.angle = direction.FORWARD
+                    self.turningStatus = turningStatus.NO_TURNING
                 else:
-                    pass
+                    self.angle = direction.RIGHT
+                    self.blocked = blocking.BLOCK
+                    self.blockedStartTime = currentTime
+                    self.turningStatus = turningStatus.TURNING
+                    self.lastRegisteredTurnTime = currentTime
 
-        elif len(ZHighValues) > 0:
-            if self.turningStatus == turningStatus.NO_TURNING and self.blocked == blocking.NO_BLOCK:
-                self.turningStatus = turningStatus.TURNING
-                self.angle = direction.LEFT
-                self.blocked = blocking.BLOCK
-                self.blockStartTime = currentTime
-                self.lastRegisteredTurnTime = timeList[recentHighIndex]
-                return self.turningStatus , self.angle, self.speed
-
-        elif len(ZlowValues) > 0:
-            if self.turningStatus == turningStatus.NO_TURNING and self.blocked == blocking.NO_BLOCK:
-                self.turningStatus = turningStatus.TURNING
-                self.angle = direction.RIGHT
-                self.blocked = blocking.BLOCK
-                self.blockStartTime = currentTime
-                self.lastRegisteredTurnTime = timeList[recentLowIndex]
-                return self.turningStatus , self.angle, self.speed
-
-        else:
-            if self.turningStatus != turningStatus.NO_TURNING:
+            elif len(ZlowValues) > 0:
+                if timeList[-amountSamples:][recentLowIndex] <= self.lastRegisteredTurnTime:
+                    self.angle = direction.FORWARD
+                    self.turningStatus = turningStatus.NO_TURNING
+                else:
+                    self.angle = direction.LEFT
+                    self.blocked = blocking.BLOCK
+                    self.blockedStartTime = currentTime
+                    self.turningStatus = turningStatus.TURNING
+                    self.lastRegisteredTurnTime = currentTime
+            else:
+                self.angle = direction.FORWARD
                 self.turningStatus = turningStatus.NO_TURNING
+
+        else:  # self.blocked == blocking.BLOCK
+            tijdVerstreken = currentTime - self.blockedStartTime
+            isAtRest = self.is_at_rest(gzList)
+
+            if tijdVerstreken >= self.BLOCK_DURATION and isAtRest:
                 self.blocked = blocking.NO_BLOCK
-            return self.turningStatus, self.angle, self.speed
+                self.turningStatus = turningStatus.NO_TURNING
+                self.angle = direction.FORWARD
+            else:
+                # nog steeds geblokkeerd: te snel na de vorige draai, OF gyro nog niet tot rust
+                self.turningStatus = turningStatus.NO_TURNING
+                self.angle = direction.FORWARD
 
         return self.turningStatus, self.angle, self.speed
 
+    def is_at_rest(self, gzList, band=None, percentage=0.8):
+        """Checkt of de recente gz-waarden grotendeels dicht bij 0 liggen (rustig),
+        ongeacht of dat via een terugflik of langzame terugkeer kwam."""
+        if band is None:
+            band = self.TURNING_TRESHOLD * 0.3  # ruime marge onder de trigger-drempel
+        if len(gzList) == 0:
+            return False
+        inBand = [x for x in gzList if -band <= x <= band]
+        return (len(inBand) / len(gzList)) >= percentage
 
 
     def averageInList(self, list, startIndex):

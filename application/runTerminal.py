@@ -5,6 +5,7 @@ Gemaakt door: Github: cha-code-ma
 
 
 import logic.detectArduinoNoGUI, logic.detectMotion
+from logic.detectMotion import turningStatus, direction
 from halfLife.halfLifeShooting import halfLifeManager
 from time import sleep
 import threading
@@ -15,13 +16,6 @@ AMOUNT_OF_ARDUINO_VALUES = 7
 AMOUNT_OF_MOMENTS = 100
 AMOUNT_OF_GRAPH_MOMENTS = 30
 
-class direction(Enum):
-    LEFT = -1
-    RIGHT = 1
-
-class turningStatus(Enum):
-    TURNING = 1
-    NO_TURNING = 0
 
 class shootMoving():
     def __init__(self):
@@ -88,7 +82,7 @@ class shootMoving():
             list.append(self.allValues[i][index])
         return list
 
-    def shootDetected(self):
+    def movementDetected(self):
         shot, accel = self.movementDetector.isShooting(self.allValues, self.time)
         shot = not self.movementDetector.stopShooting(self.allValues, self.time)
         turning, direc, _ = self.movementDetector.turning(self.allValues, self.time)
@@ -101,8 +95,12 @@ class shootMoving():
             self.isShooting = False
             #print(f"Is NOT shooting")
 
+        print(f"gz: {self.allValues[5][-1]}")
+        print(f"gx: {self.allValues[0][-1]}")
+
         if turning == turningStatus.TURNING:
             print("turning")
+
             self.halfLifeManager.turn(direc)
 
     def loopEvent(self):
@@ -120,7 +118,7 @@ class shootMoving():
 
             return None
 
-        self.shootDetected()
+        self.movementDetected()
         if self.isShooting:
             self.halfLifeManager.shoot()
 

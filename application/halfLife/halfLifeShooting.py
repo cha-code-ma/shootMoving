@@ -14,6 +14,8 @@ class direction(Enum):
     RIGHT = 1
 
 class halfLifeManager():
+    shootLock = threading.Lock()
+    turnLock = threading.Lock()
 
     def __init__(self):
         self.width, self.heigth = pyautogui.size()
@@ -26,24 +28,27 @@ class halfLifeManager():
         t.start()
 
     def shoot_thread(self):
-        pyautogui.click(self.Xcenter, self.Ycenter)
-        sleep(0.050)
-        pyautogui.click(self.Xcenter, self.Ycenter)
+        with self.shootLock:
+            print("shooting")
+            pyautogui.click(self.Xcenter, self.Ycenter)
+            sleep(0.050)
+            pyautogui.click(self.Xcenter, self.Ycenter)
 
     def turn(self, dir: direction):
-        t = threading.Thread(target=self.turn_thread)
+        t = threading.Thread(target=self.turn_thread, args=[dir])
         t.start()
 
     def turn_thread(self, dit:direction):
-        print("turning")
-        if dir == direction.LEFT:
-            pyautogui.moveTo(self.Xcenter, self.Ycenter)
-            pyautogui.dragRel(-self.Xcenter// 5, 0, duration=0.1)
-            pyautogui.moveTo(self.Xcenter, self.Ycenter)
-        if dir == direction.RIGHT:
-            pyautogui.moveTo(self.Xcenter, self.Ycenter)
-            pyautogui.dragRel(self.Xcenter// 5, 0, duration=0.1)
-            pyautogui.moveTo(self.Xcenter, self.Ycenter)
+        with self.turnLock:
+            print("turning")
+            if dit == direction.LEFT:
+                pyautogui.moveTo(self.Xcenter, self.Ycenter)
+                pyautogui.dragRel(-self.Xcenter// 5, 0, duration=0.1)
+                pyautogui.moveTo(self.Xcenter, self.Ycenter)
+            if dit == direction.RIGHT:
+                pyautogui.moveTo(self.Xcenter, self.Ycenter)
+                pyautogui.dragRel(self.Xcenter// 5, 0, duration=0.1)
+                pyautogui.moveTo(self.Xcenter, self.Ycenter)
 
     def test(self):
 
