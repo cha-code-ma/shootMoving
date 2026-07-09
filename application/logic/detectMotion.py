@@ -102,7 +102,7 @@ class movementDetector():
 
             if len(ZHighValues) > 0 and len(ZlowValues) > 0:
                 if recentLowIndex > recentHighIndex:
-                    if timeList[-amountSamples:][recentLowIndex] <= self.lastRegisteredTurnTime:
+                    if timeList[-amountSamples:][recentLowIndex] <= self.lastRegisteredTurnTime and self.angle == direction.FORWARD:
                         self.angle = direction.FORWARD
                         self.turningStatus = turningStatus.NO_TURNING
                     else:

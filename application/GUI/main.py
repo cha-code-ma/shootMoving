@@ -94,6 +94,10 @@ class shootMovingUI(QMainWindow):
     def addValues(self, values):
         if type(values) is bool or len(values) != AMOUNT_OF_ARDUINO_VALUES:
             return None
+        lastValues = list(zip(*self.allValues))[-1][0:6]
+
+        if lastValues == list(values[0:6]):
+            return None
 
         for i in range(AMOUNT_OF_ARDUINO_VALUES):
             if i == AMOUNT_OF_ARDUINO_VALUES - 1:
@@ -127,7 +131,7 @@ class shootMovingUI(QMainWindow):
         self.ui.buttonChooseStart.hide()
         self.ui.buttonChooseTest.hide()
 
-    def shootDetected(self):
+    def movementDetected(self):
         shot, accel = self.movementDetector.isShooting(self.allValues, self.time)
         shot = not self.movementDetector.stopShooting(self.allValues, self.time)
         turning, direc, _ = self.movementDetector.turning(self.allValues, self.time)
@@ -142,6 +146,7 @@ class shootMovingUI(QMainWindow):
             self.ui.shootDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
 
         if turning == turningStatus.TURNING:
+            print(f"turning: {direc}")
             self.halfLifeManager.turn(direc)
 
 
@@ -157,7 +162,7 @@ class shootMovingUI(QMainWindow):
             self.ui.shootDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
             return None
 
-        self.shootDetected()
+        self.movementDetected()
 
         if self.isShooting:
             self.halfLifeManager.shoot()
