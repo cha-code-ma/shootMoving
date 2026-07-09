@@ -52,20 +52,20 @@ class movementDetector():
             currentTime = 0
 
         accelList, gyroList = valuesList[0:3], valuesList[3:7]
-        gxList = gyroList[0][-amountSamples:]
+        gyList = gyroList[1][-amountSamples:]
 
 
-        XHighValues = [[x, i] for i, x in enumerate(gxList) if x > self.WALKING_TRESHOLD]
-        XlowValues = [[x, i] for i, x in enumerate(gxList) if x < -self.WALKING_TRESHOLD]
+        yHighValues = [[x, i] for i, x in enumerate(gyList) if x > self.WALKING_TRESHOLD]
+        xLowValues = [[x, i] for i, x in enumerate(gyList) if x < -self.WALKING_TRESHOLD]
 
-        if len(XHighValues) > 0:
-            indexHighValues = list(zip(*XHighValues))[1]
+        if len(yHighValues) > 0:
+            indexHighValues = list(zip(*yHighValues))[1]
             recentHighIndex = max(indexHighValues)
-        if len(XlowValues) > 0:
-            indexLowValues = list(zip(*XlowValues))[1]
+        if len(xLowValues) > 0:
+            indexLowValues = list(zip(*xLowValues))[1]
             recentLowIndex = max(indexLowValues)
         if self.blockedTurning == blocking.NO_BLOCK:
-            if len(XHighValues) > 0 and len(XlowValues) > 0:
+            if len(yHighValues) > 0 and len(xLowValues) > 0:
                 if recentHighIndex > recentLowIndex:
                     if timeList[-amountSamples:][recentHighIndex] <= self.lastRegisterdWalkTime:# and self.walkingDirection == WalkingStatus.STANDING
                         self.lastRegisterdWalkTime = currentTime
@@ -80,14 +80,14 @@ class movementDetector():
                         self.walkingDirection = walkingStatus.BACKWARD
                         self.blockedWalking = blocking.BLOCK
                         self.lastRegisterdWalkTime = currentTime
-            elif len(XHighValues) > 0:
+            elif len(yHighValues) > 0:
                 if timeList[-amountSamples:][recentHighIndex] <= self.lastRegisterdWalkTime:# and self.walkingDirection == WalkingStatus.STANDING
                         self.lastRegisterdWalkTime = currentTime
                 else:
                     self.walkingDirection = walkingStatus.FORWARD
                     self.blockedWalking = blocking.BLOCK
                     self.lastRegisterdWalkTime = currentTime
-            elif len(XlowValues) > 0:
+            elif len(xLowValues) > 0:
                 if timeList[-amountSamples:][recentLowIndex] <= self.lastRegisterdWalkTime:# and self.walkingDirection == WalkingStatus.STANDING
                         self.lastRegisterdWalkTime = currentTime
                 else:
