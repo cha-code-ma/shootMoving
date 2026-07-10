@@ -2,16 +2,12 @@
 
 """
 from enum import Enum
-
-
-class direction(Enum):
-    LEFT = -1
-    FORWARD = 0
-    RIGHT = 1
+from halfLife.halfLifeShooting import halfLifeManager
 
 class turningStatus(Enum):
-    TURNING = 1
-    NO_TURNING = 0
+    LEFT = 1
+    STRAIGHT = 0
+    RIGHT = -1
 
 class blocking(Enum):
     NO_BLOCK = 1
@@ -42,80 +38,44 @@ class movementDetector():
 
         #walking variables:
         self.blockedWalking = blocking.NO_BLOCK
-        self.lastRegisterdWalkTime = 0
+        self.lastStartWalkingTime = 0
         self.walkingDirection = walkingStatus.STANDING
         self.speedWalking = 1
 
-    def walking(self, valuesList, timeList, amountSamples=6) -> tuple[walkingStatus, float]:
+        #halfLife:
+        self.halfLifeManager = halfLifeManager()
+
+    def walking(self, valuesList, timeList, amountSamples=10):
         currentTime = timeList[-1]
         if not currentTime:
             currentTime = 0
-
+        timeList = timeList[-amountSamples:]
         accelList, gyroList = valuesList[0:3], valuesList[3:7]
         gyList = gyroList[1][-amountSamples:]
+        lastActivationIndex, positive, self.lastRegisterdWalkTime = self.mostRecentIndex(timeList, gyList, self.lastRegisterdWalkTime, self.WALKING_TRESHOLD)
 
-
-        yHighValues = [[x, i] for i, x in enumerate(gyList) if x > self.WALKING_TRESHOLD]
-        xLowValues = [[x, i] for i, x in enumerate(gyList) if x < -self.WALKING_TRESHOLD]
-
-        if len(yHighValues) > 0:
-            indexHighValues = list(zip(*yHighValues))[1]
-            recentHighIndex = max(indexHighValues)
-        if len(xLowValues) > 0:
-            indexLowValues = list(zip(*xLowValues))[1]
-            recentLowIndex = max(indexLowValues)
-        if self.blockedTurning == blocking.NO_BLOCK:
-            if len(yHighValues) > 0 and len(xLowValues) > 0:
-                if recentHighIndex > recentLowIndex:
-                    if timeList[-amountSamples:][recentHighIndex] <= self.lastRegisterdWalkTime:# and self.walkingDirection == WalkingStatus.STANDING
-                        self.lastRegisterdWalkTime = currentTime
-                    else:
-                        self.walkingDirection = walkingStatus.FORWARD
-                        self.blockedWalking = blocking.BLOCK
-                        self.lastRegisterdWalkTime = currentTime
-                elif recentLowIndex > recentHighIndex:
-                    if timeList[-amountSamples:][recentLowIndex] <= self.lastRegisterdWalkTime:# and self.walkingDirection == WalkingStatus.STANDING
-                        self.lastRegisterdWalkTime = currentTime
-                    else:
-                        self.walkingDirection = walkingStatus.BACKWARD
-                        self.blockedWalking = blocking.BLOCK
-                        self.lastRegisterdWalkTime = currentTime
-            elif len(yHighValues) > 0:
-                if timeList[-amountSamples:][recentHighIndex] <= self.lastRegisterdWalkTime:# and self.walkingDirection == WalkingStatus.STANDING
-                        self.lastRegisterdWalkTime = currentTime
-                else:
+        if lastActivationIndex is not None:
+            if self.walkingDirection == walkingStatus.STANDING:
+                if positive:
                     self.walkingDirection = walkingStatus.FORWARD
-                    self.blockedWalking = blocking.BLOCK
-                    self.lastRegisterdWalkTime = currentTime
-            elif len(xLowValues) > 0:
-                if timeList[-amountSamples:][recentLowIndex] <= self.lastRegisterdWalkTime:# and self.walkingDirection == WalkingStatus.STANDING
-                        self.lastRegisterdWalkTime = currentTime
+                    self.lastStartWalkingTime = currentTime
+                    self.halfLifeManager.walk(self.walkingDirection, 1)
                 else:
                     self.walkingDirection = walkingStatus.BACKWARD
-                    self.blockedWalking = blocking.BLOCK
-                    self.lastRegisterdWalkTime = currentTime
-            else:
-                self.walkingDirection = walkingStatus.STANDING
-
-        else: #block, dus eigenlijk niks, maar update tijd, block
-            if currentTime - self.lastRegisterdWalkTime >= self.BLOCK_WALK_DURATION:
-                self.blockedWalking = blocking.NO_BLOCK
-                self.walkingDirection = walkingStatus.STANDING
-            else:
-                self.walkingDirection = walkingStatus.STANDING
-
-        return self.walkingDirection, self.speedWalking
+                    self.lastStartWalkingTime = currentTime
+                    self.halfLifeManager.walk(self.walkingDirection, 1)
+            elif self.walkingDirection == walkingStatus.FORWARD:
+                if not positive:
+                    self.walkingDirection = walkingStatus.STANDING
+            elif self.walkingDirection == walkingStatus.BACKWARD:
+                if positive:
+                    self.walkingDirection = walkingStatus.STANDING
 
 
+        if currentTime - self.lastStartWalkingTime >= 0.9:
+            self.walkingDirection = walkingStatus.STANDING
 
-
-
-
-
-
-
-
-
+        return self.walkingDirection
 
 
 
@@ -166,86 +126,89 @@ class movementDetector():
                     return shot, strength
         return False, 0
 
+
+    def mostRecentIndex(self, time, valueList, lastRegisteredTime, treshold) -> tuple[int, bool]:
+        recentIndex = None
+        positive = None
+        ZHighValues = [[x, i] for i, x in enumerate(valueList) if x > treshold]
+        ZlowValues = [[x, i] for i, x in enumerate(valueList) if x < -treshold]
+        if len(indexLowValues) > 0 and len(indexHighValues) > 0:
+            indexHighValues = list(zip(*ZHighValues))[1]
+            recentHighIndex = max(indexHighValues)
+            indexLowValues = list(zip(*ZlowValues))[1]
+            recentLowIndex = max(indexLowValues)
+
+            if recentHighIndex > recentLowIndex:
+                if time[recentHighIndex] > lastRegisteredTime:
+                    recentIndex = recentHighIndex
+                    positive = True
+                else:
+                    recentIndex = None
+            else:
+                if time[recentLowIndex] > lastRegisteredTime:
+                    recentIndex = recentLowIndex
+                    positive = False
+                else:
+                    recentIndex = None
+
+        elif len(indexLowValues) > 0:
+            indexLowValues = list(zip(*ZlowValues))[1]
+            recentLowIndex = max(indexLowValues)
+            if time[recentLowIndex] > lastRegisteredTime:
+                recentIndex = recentLowIndex
+                positive = False
+            else:
+                recentIndex = None
+        elif len(indexHighValues)  > 0:
+            indexHighValues = list(zip(*ZHighValues))[1]
+            recentHighIndex = max(indexHighValues)
+            if time[recentHighIndex] > lastRegisteredTime:
+                recentIndex = recentHighIndex
+                positive = True
+            else:
+                recentIndex = None
+        else:
+            recentIndex = None
+        return recentIndex, positive, lastRegisteredTime
+
+
     def turning(self, valuesList: list, timeList: list, amountSamples=10) -> tuple[turningStatus, direction, float]:
+        """
+        if turning == turningStatus.TURNING:
+            print(f"turning: {direc}")
+            self.halfLifeManager.turn(direc)
+        """
         currentTime = timeList[-1]
         if not currentTime:
             currentTime = 0
-
+        timeList = timeList[-amountSamples:]
         accelList, gyroList = valuesList[0:3], valuesList[3:7]
         gzList = gyroList[2][-amountSamples:]
+        lastActivationIndex, positive, self.lastRegisteredTurnTime = self.mostRecentIndex(timeList, gzList, self.lastRegisteredTurnTime, self.TURNING_TRESHOLD)
 
-        if self.blockedTurning == blocking.NO_BLOCK:
-            ZHighValues = [[x, i] for i, x in enumerate(gzList) if x > self.TURNING_TRESHOLD]
-            ZlowValues = [[x, i] for i, x in enumerate(gzList) if x < -self.TURNING_TRESHOLD]
-
-            if len(ZHighValues) > 0:
-                indexHighValues = list(zip(*ZHighValues))[1]
-                recentHighIndex = max(indexHighValues)
-            if len(ZlowValues) > 0:
-                indexLowValues = list(zip(*ZlowValues))[1]
-                recentLowIndex = max(indexLowValues)
-
-            if len(ZHighValues) > 0 and len(ZlowValues) > 0:
-                if recentLowIndex > recentHighIndex:
-                    if timeList[-amountSamples:][recentLowIndex] <= self.lastRegisteredTurnTime : #and self.angleTurning == direction.FORWARD
-                        self.angleTurning = direction.FORWARD
-                        self.turningStatus = turningStatus.NO_TURNING
-                    else:
-                        self.angleTurning = direction.LEFT
-                        self.blockedTurning = blocking.BLOCK
-                        self.blockedTurningStartTime = currentTime
-                        self.turningStatus = turningStatus.TURNING
-                        self.lastRegisteredTurnTime = currentTime
-                elif recentHighIndex > recentLowIndex:
-                    if timeList[-amountSamples:][recentHighIndex] <= self.lastRegisteredTurnTime:
-                        self.angleTurning = direction.FORWARD
-                        self.turningStatus = turningStatus.NO_TURNING
-                    else:
-                        self.angleTurning = direction.RIGHT
-                        self.blockedTurningStartTime = currentTime
-                        self.blockedTurning = blocking.BLOCK
-                        self.turningStatus = turningStatus.TURNING
-                        self.lastRegisteredTurnTime = currentTime
-
-            elif len(ZHighValues) > 0:
-                if timeList[-amountSamples:][recentHighIndex] <= self.lastRegisteredTurnTime:
-                    self.angleTurning = direction.FORWARD
-                    self.turningStatus = turningStatus.NO_TURNING
-                else:
-                    self.angleTurning = direction.RIGHT
-                    self.blockedTurning = blocking.BLOCK
-                    self.blockedTurningStartTime = currentTime
-                    self.turningStatus = turningStatus.TURNING
+        if lastActivationIndex is not None:
+            if self.turningStatus == turningStatus.STRAIGHT:
+                if positive:
+                    self.walkinturningStatusgDirection = turningStatus.RIGHT
                     self.lastRegisteredTurnTime = currentTime
-
-            elif len(ZlowValues) > 0:
-                if timeList[-amountSamples:][recentLowIndex] <= self.lastRegisteredTurnTime:
-                    self.angleTurning = direction.FORWARD
-                    self.turningStatus = turningStatus.NO_TURNING
+                    self.halfLifeManager.turn(self.turningStatus)
                 else:
-                    self.angleTurning = direction.LEFT
-                    self.blockedTurning = blocking.BLOCK
-                    self.blockedTurningStartTime = currentTime
-                    self.turningStatus = turningStatus.TURNING
+                    self.turningStatus = turningStatus.LEFT
                     self.lastRegisteredTurnTime = currentTime
-            else:
-                self.angleTurning = direction.FORWARD
-                self.turningStatus = turningStatus.NO_TURNING
+                    self.halfLifeManager.turn(self.turningStatus)
+            elif self.turningStatus == turningStatus.RIGHT:
+                if not positive:
+                    self.turningStatus = turningStatus.STRAIGHT
+            elif self.turningStatus == turningStatus.LEFT:
+                if positive:
+                    self.turningStatus = turningStatus.STRAIGHT
 
-        else:  # self.blocked == blocking.BLOCK
-            tijdVerstreken = currentTime - self.blockedTurningStartTime
-            isAtRest = self.is_at_rest(gzList)
 
-            if tijdVerstreken >= self.BLOCK_TURN_DURATION and isAtRest:
-                self.blockedTurning = blocking.NO_BLOCK
-                self.turningStatus = turningStatus.NO_TURNING
-                self.angleTurning = direction.FORWARD
-            else:
-                # nog steeds geblokkeerd: te snel na de vorige draai, OF gyro nog niet tot rust
-                self.turningStatus = turningStatus.NO_TURNING
-                self.angleTurning = direction.FORWARD
+        if currentTime - self.lastRegisteredTurnTime >= 0.9:
+            self.turningStatus = turningStatus.STRAIGHT
 
-        return self.turningStatus, self.angleTurning, self.speedTurning
+        return self.turningStatus
+
 
     def is_at_rest(self, gzList, band=None, percentage=0.8):
         """Checkt of de recente gz-waarden grotendeels dicht bij 0 liggen (rustig),
@@ -290,6 +253,16 @@ class movementDetector():
         if len(list) == 0 or len(list) < abs(startIndex):
             return False
         return True
+
+    def getStatus(self, allValues, time):
+        shot, accel = self.isShooting(allValues, time)
+        shot = not self.stopShooting(allValues, time)
+        turning, direc, _ = self.turning(allValues, time)
+        walking = self.walking(allValues, time)
+
+        return shot, accel, turning, direc, walking
+
+
 
     """
     def logging(self, fallType):

@@ -9,7 +9,7 @@ import threading
 import pyautogui
 from time import sleep
 from enum import Enum
-from logic.detectMotion import direction, walkingStatus
+from logic.detectMotion import turningStatus, walkingStatus
 
 class halfLifeManager():
     shootLock = threading.Lock()
@@ -48,17 +48,17 @@ class halfLifeManager():
             sleep(0.050)
             pyautogui.click(self.Xcenter, self.Ycenter)
 
-    def turn(self, dir: direction):
+    def turn(self, dir: turningStatus):
         t = threading.Thread(target=self.turn_thread, args=[dir])
         t.start()
 
-    def turn_thread(self, direct:direction):
+    def turn_thread(self, direct: turningStatus):
         with self.turnLock:
-            if direct == direction.LEFT:
+            if direct == turningStatus.LEFT:
                 pyautogui.moveTo(self.Xcenter, self.Ycenter)
                 pyautogui.dragRel(-self.Xcenter// 5, 0, duration=0.1)
                 pyautogui.moveTo(self.Xcenter, self.Ycenter)
-            if direct == direction.RIGHT:
+            if direct == turningStatus.RIGHT:
                 pyautogui.moveTo(self.Xcenter, self.Ycenter)
                 pyautogui.dragRel(self.Xcenter// 5, 0, duration=0.1)
                 pyautogui.moveTo(self.Xcenter, self.Ycenter)

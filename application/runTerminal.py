@@ -83,10 +83,7 @@ class shootMoving():
         return list
 
     def movementDetected(self):
-        shot, accel = self.movementDetector.isShooting(self.allValues, self.time)
-        shot = not self.movementDetector.stopShooting(self.allValues, self.time)
-        turning, direc, _ = self.movementDetector.turning(self.allValues, self.time)
-        walking, walkSpeed = self.movementDetector.walking(self.allValues, self.time)
+        shot, accel, turning, direc, walking, walkSpeed = self.movementDetector.getStatus(self.allValues, self.time)
         if shot:
             self.isShooting = True
             #print(f"Is shooting: {accel}")
@@ -99,13 +96,10 @@ class shootMoving():
         print(f"gx: {self.allValues[0][-1]}")
 
         if turning == turningStatus.TURNING:
-            print("turning")
+
 
             self.halfLifeManager.turn(direc)
 
-        if walking != walkingStatus.STANDING:
-            print(f"walking: {walking}")
-            self.halfLifeManager.walk(walking, walkSpeed)
 
 
     def loopEvent(self):

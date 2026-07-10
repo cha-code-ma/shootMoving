@@ -127,11 +127,8 @@ class shootMovingUI(QMainWindow):
         self.ui.buttonChooseTest.hide()
 
     def movementDetected(self):
-        shot, accel = self.movementDetector.isShooting(self.allValues, self.time)
-        shot = not self.movementDetector.stopShooting(self.allValues, self.time)
-        turning, direc, _ = self.movementDetector.turning(self.allValues, self.time)
-        walking, walkSpeed = self.movementDetector.walking(self.allValues, self.time)
 
+        shot, accel, turning, direc, walking = self.movementDetector.getStatus(self.allValues, self.time)
         if shot:
             self.isShooting = True
             self.ui.shootDetectionText.setPlainText(f"Is shooting: {accel}")
@@ -141,13 +138,8 @@ class shootMovingUI(QMainWindow):
             self.ui.shootDetectionText.setPlainText(f"Is NOT shooting")
             self.ui.shootDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
 
-        if turning == turningStatus.TURNING:
-            print(f"turning: {direc}")
-            self.halfLifeManager.turn(direc)
+        
 
-        if walking != walkingStatus.STANDING:
-            print(f"walking: {walking}")
-            self.halfLifeManager.walk(walking, walkSpeed)
 
     def startButtonClicked(self):
             self.timer.start()
