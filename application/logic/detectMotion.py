@@ -1,18 +1,9 @@
 """
 
 """
-from enum import Enum
+from logic.enums import turningStatus, walkingStatus
 from halfLife.halfLifeShooting import halfLifeManager
 
-class turningStatus(Enum):
-    LEFT = 1
-    STRAIGHT = 0
-    RIGHT = -1
-
-class walkingStatus(Enum):
-    FORWARD = 1
-    STANDING = 0
-    BACKWARD = -1
 
 class movementDetector():
     ACCEL_TRESHOLD = 0.8
@@ -35,7 +26,7 @@ class movementDetector():
         self.lastStartWalkingTime = 0
         self.walkingDirection = walkingStatus.STANDING
         self.speedWalking = 1
-
+        self.lastRegisterdWalkTime = 0
         #halfLife:
         self.halfLifeManager = halfLifeManager()
 
@@ -79,6 +70,14 @@ class movementDetector():
         if x >= precantage:
             return True
         return False
+
+    def shoot(self, valueList, timeList, amountSamples=2):
+        shoot, _ = self.isShooting(valueList, timeList)
+        shot = not self.stopShooting(valueList, timeList)
+        if shot:
+            self.halfLifeManager.shoot()
+
+        return shot
 
     def stopShooting(self, valuesList, timeList, amountSamples = 2) -> bool:
         accelList, gyroList = valuesList[0:3], valuesList[3:7]
@@ -124,12 +123,13 @@ class movementDetector():
     def mostRecentIndex(self, time, valueList, lastRegisteredTime, treshold) -> tuple[int, bool]:
         recentIndex = None
         positive = None
-        ZHighValues = [[x, i] for i, x in enumerate(valueList) if x > treshold]
-        ZlowValues = [[x, i] for i, x in enumerate(valueList) if x < -treshold]
-        if len(indexLowValues) > 0 and len(indexHighValues) > 0:
-            indexHighValues = list(zip(*ZHighValues))[1]
+        HighValues = [[x, i] for i, x in enumerate(valueList) if x > treshold]
+        lowValues = [[x, i] for i, x in enumerate(valueList) if x < -treshold]
+
+        if len(HighValues) > 0 and len(lowValues) > 0:
+            indexHighValues = list(zip(*HighValues))[1]
             recentHighIndex = max(indexHighValues)
-            indexLowValues = list(zip(*ZlowValues))[1]
+            indexLowValues = list(zip(*lowValues))[1]
             recentLowIndex = max(indexLowValues)
 
             if recentHighIndex > recentLowIndex:
@@ -145,16 +145,16 @@ class movementDetector():
                 else:
                     recentIndex = None
 
-        elif len(indexLowValues) > 0:
-            indexLowValues = list(zip(*ZlowValues))[1]
+        elif len(lowValues) > 0:
+            indexLowValues = list(zip(*lowValues))[1]
             recentLowIndex = max(indexLowValues)
             if time[recentLowIndex] > lastRegisteredTime:
                 recentIndex = recentLowIndex
                 positive = False
             else:
                 recentIndex = None
-        elif len(indexHighValues)  > 0:
-            indexHighValues = list(zip(*ZHighValues))[1]
+        elif len(HighValues)  > 0:
+            indexHighValues = list(zip(*HighValues))[1]
             recentHighIndex = max(indexHighValues)
             if time[recentHighIndex] > lastRegisteredTime:
                 recentIndex = recentHighIndex
@@ -238,12 +238,11 @@ class movementDetector():
         return True
 
     def getStatus(self, allValues, time):
-        shot, accel = self.isShooting(allValues, time)
-        shot = not self.stopShooting(allValues, time)
+        shot = self.shoot(allValues, time)
         turning = self.turning(allValues, time)
         walking = self.walking(allValues, time)
 
-        return shot, accel, turning, walking
+        return shot, turning, walking
 
 
 

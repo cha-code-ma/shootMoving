@@ -10,11 +10,9 @@ dit is de start, geen implementatie, alleen basis voor PyQt5
 """
 
 import logic.detectArduino, logic.detectMotion
-from logic.detectMotion import turningStatus, walkingStatus
+from logic.enums import turningStatus, walkingStatus
 from GUI.window_ui import Ui_Form
-from halfLife.halfLifeShooting import halfLifeManager
 import sys
-from enum import Enum
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QTimer, QThread
 from PyQt5.QtWidgets import *
@@ -77,8 +75,6 @@ class shootMovingUI(QMainWindow):
         self.movementDetector = logic.detectMotion.movementDetector()
         self.isShooting = False
 
-        #HalfLife:
-        self.halfLifeManager = halfLifeManager()
 
 
     def startFunction(self):
@@ -128,10 +124,10 @@ class shootMovingUI(QMainWindow):
 
     def movementDetected(self):
 
-        shot, accel, turning, walking = self.movementDetector.getStatus(self.allValues, self.time)
+        shot, turning, walking = self.movementDetector.getStatus(self.allValues, self.time)
         if shot:
             self.isShooting = True
-            self.ui.shootDetectionText.setPlainText(f"Is shooting: {accel}")
+            self.ui.shootDetectionText.setPlainText(f"Is shooting: ")
             self.ui.shootDetectionText.setStyleSheet("background-color: rgb(0, 255, 0);")
         else:
             self.isShooting = False
@@ -165,10 +161,8 @@ class shootMovingUI(QMainWindow):
 
         self.movementDetected()
 
-        if self.isShooting:
-            self.halfLifeManager.shoot()
         #lastValues = self.chooseValuesIndex(-1)
-        print(f"{self.allValues[3][-1]}, {self.allValues[4][-1]}, {self.allValues[5][-1]}")
+
         self.ui.MplWidget.canvas.axes.clear()
         self.ui.MplWidget.canvas.axes.set_ylim(-50, 50)
         self.ui.MplWidget.canvas.axes.plot(self.time, self.graphValues[0],'r',linewidth= 0.5, label = 'ax')

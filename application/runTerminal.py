@@ -2,15 +2,10 @@
 Gemaakt door: Github: cha-code-ma
 
 """
-
-
 import logic.detectArduinoNoGUI, logic.detectMotion
-from logic.detectMotion import turningStatus, walkingStatus
-from halfLife.halfLifeShooting import halfLifeManager
 from time import sleep
 import threading
 import queue
-from enum import Enum
 
 AMOUNT_OF_ARDUINO_VALUES = 7
 AMOUNT_OF_MOMENTS = 100
@@ -40,8 +35,6 @@ class shootMoving():
         self.movementDetector = logic.detectMotion.movementDetector()
         self.isShooting = False
 
-        #HalfLife:
-        self.halfLifeManager = halfLifeManager()
 
 
     def start(self):
@@ -112,8 +105,7 @@ class shootMoving():
             return None
 
         self.movementDetected()
-        if self.isShooting:
-            self.halfLifeManager.shoot()
+
 
 
 

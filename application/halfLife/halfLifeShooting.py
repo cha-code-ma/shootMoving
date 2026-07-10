@@ -8,12 +8,11 @@ In this file, we will try to shoot automatically in half-life.
 import threading
 import pyautogui
 from time import sleep
-from logic.detectMotion import turningStatus, walkingStatus
+from logic.enums import turningStatus, walkingStatus
 
 class halfLifeManager():
-    shootLock = threading.Lock()
-    turnLock = threading.Lock()
-    walkLock = threading.Lock()
+    pyautoguiLock = threading.Lock()
+
 
     def __init__(self):
         self.width, self.heigth = pyautogui.size()
@@ -22,11 +21,11 @@ class halfLifeManager():
 
 
     def walk(self, direct, speed):
-        t = threading.Thread(target = self.walk_thread)
+        t = threading.Thread(target = self.walk_thread, args=[direct, speed])
         t.start()
 
     def walk_thread(self, direct, speed):
-        with self.walkLock:
+        with self.pyautoguiLock:
             if direct == walkingStatus.FORWARD:
                 pyautogui.keyDown('w')
                 sleep(0.5)
@@ -42,7 +41,7 @@ class halfLifeManager():
         t.start()
 
     def shoot_thread(self):
-        with self.shootLock:
+        with self.pyautoguiLock:
             pyautogui.click(self.Xcenter, self.Ycenter)
             sleep(0.050)
             pyautogui.click(self.Xcenter, self.Ycenter)
@@ -52,7 +51,7 @@ class halfLifeManager():
         t.start()
 
     def turn_thread(self, direct: turningStatus):
-        with self.turnLock:
+        with self.pyautoguiLock:
             if direct == turningStatus.LEFT:
                 pyautogui.moveTo(self.Xcenter, self.Ycenter)
                 pyautogui.dragRel(-self.Xcenter// 5, 0, duration=0.1)
