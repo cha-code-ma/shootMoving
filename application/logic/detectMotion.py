@@ -9,10 +9,6 @@ class turningStatus(Enum):
     STRAIGHT = 0
     RIGHT = -1
 
-class blocking(Enum):
-    NO_BLOCK = 1
-    BLOCK = 0
-
 class walkingStatus(Enum):
     FORWARD = 1
     STANDING = 0
@@ -29,15 +25,13 @@ class movementDetector():
     BLOCK_WALK_DURATION = 0.8
     def __init__(self):
         #turning variables:
-        self.blockedTurning = blocking.NO_BLOCK
         self.blockedTurningStartTime = 0
-        self.angleTurning = direction.FORWARD
-        self.turningStatus = turningStatus.NO_TURNING
+        self.turningStatus = turningStatus.STRAIGHT
         self.speedTurning = 1
         self.lastRegisteredTurnTime = 0
 
         #walking variables:
-        self.blockedWalking = blocking.NO_BLOCK
+
         self.lastStartWalkingTime = 0
         self.walkingDirection = walkingStatus.STANDING
         self.speedWalking = 1
@@ -172,7 +166,7 @@ class movementDetector():
         return recentIndex, positive, lastRegisteredTime
 
 
-    def turning(self, valuesList: list, timeList: list, amountSamples=10) -> tuple[turningStatus, direction, float]:
+    def turning(self, valuesList: list, timeList: list, amountSamples=10) -> turningStatus:
         """
         if turning == turningStatus.TURNING:
             print(f"turning: {direc}")
@@ -208,17 +202,6 @@ class movementDetector():
             self.turningStatus = turningStatus.STRAIGHT
 
         return self.turningStatus
-
-
-    def is_at_rest(self, gzList, band=None, percentage=0.8):
-        """Checkt of de recente gz-waarden grotendeels dicht bij 0 liggen (rustig),
-        ongeacht of dat via een terugflik of langzame terugkeer kwam."""
-        if band is None:
-            band = self.TURNING_TRESHOLD * 0.3
-        if len(gzList) == 0:
-            return False
-        inBand = [x for x in gzList if -band <= x <= band]
-        return (len(inBand) / len(gzList)) >= percentage
 
 
     def averageInList(self, list, startIndex):
@@ -257,10 +240,10 @@ class movementDetector():
     def getStatus(self, allValues, time):
         shot, accel = self.isShooting(allValues, time)
         shot = not self.stopShooting(allValues, time)
-        turning, direc, _ = self.turning(allValues, time)
+        turning = self.turning(allValues, time)
         walking = self.walking(allValues, time)
 
-        return shot, accel, turning, direc, walking
+        return shot, accel, turning, walking
 
 
 

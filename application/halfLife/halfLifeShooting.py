@@ -8,7 +8,6 @@ In this file, we will try to shoot automatically in half-life.
 import threading
 import pyautogui
 from time import sleep
-from enum import Enum
 from logic.detectMotion import turningStatus, walkingStatus
 
 class halfLifeManager():

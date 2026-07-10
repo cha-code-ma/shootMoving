@@ -51,7 +51,7 @@ class shootMoving():
                 self.loopEvent()
                 sleep(0.1)
         except KeyboardInterrupt:
-                print("Afsluiten...")
+                print("closing...")
         finally:
             self.stopEvent.set()
             self.thread.join()
@@ -83,7 +83,7 @@ class shootMoving():
         return list
 
     def movementDetected(self):
-        shot, accel, turning, direc, walking, walkSpeed = self.movementDetector.getStatus(self.allValues, self.time)
+        shot, accel, turning, direc = self.movementDetector.getStatus(self.allValues, self.time)
         if shot:
             self.isShooting = True
             #print(f"Is shooting: {accel}")
@@ -94,12 +94,6 @@ class shootMoving():
 
         print(f"gz: {self.allValues[5][-1]}")
         print(f"gx: {self.allValues[0][-1]}")
-
-        if turning == turningStatus.TURNING:
-
-
-            self.halfLifeManager.turn(direc)
-
 
 
     def loopEvent(self):

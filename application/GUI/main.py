@@ -10,7 +10,7 @@ dit is de start, geen implementatie, alleen basis voor PyQt5
 """
 
 import logic.detectArduino, logic.detectMotion
-from logic.detectMotion import direction, turningStatus, walkingStatus
+from logic.detectMotion import turningStatus, walkingStatus
 from GUI.window_ui import Ui_Form
 from halfLife.halfLifeShooting import halfLifeManager
 import sys
@@ -128,7 +128,7 @@ class shootMovingUI(QMainWindow):
 
     def movementDetected(self):
 
-        shot, accel, turning, direc, walking = self.movementDetector.getStatus(self.allValues, self.time)
+        shot, accel, turning, walking = self.movementDetector.getStatus(self.allValues, self.time)
         if shot:
             self.isShooting = True
             self.ui.shootDetectionText.setPlainText(f"Is shooting: {accel}")
@@ -138,8 +138,19 @@ class shootMovingUI(QMainWindow):
             self.ui.shootDetectionText.setPlainText(f"Is NOT shooting")
             self.ui.shootDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
 
-        
+        if turning != turningStatus.STRAIGHT:
+            self.ui.turnDetectionText.setPlainText(f"Is NOT turning")
+            self.ui.turnDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
+        else:
+            self.ui.turnDetectionText.setPlainText(f"Is turning: {turning}")
+            self.ui.turnDetectionText.setStyleSheet("background-color: rgb(0, 255, 0);")
 
+        if walking != walkingStatus.STANDING:
+            self.ui.turnDetectionText.setPlainText(f"Is NOT walking")
+            self.ui.turnDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
+        else:
+            self.ui.turnDetectionText.setPlainText(f"Is walking: {walking}")
+            self.ui.turnDetectionText.setStyleSheet("background-color: rgb(0, 255, 0);")
 
     def startButtonClicked(self):
             self.timer.start()
