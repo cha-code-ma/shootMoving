@@ -76,7 +76,7 @@ class shootMoving():
         return list
 
     def movementDetected(self):
-        shot, accel, turning, direc = self.movementDetector.getStatus(self.allValues, self.time)
+        shot, turning, walking = self.movementDetector.getStatus(self.allValues, self.time)
         if shot:
             self.isShooting = True
             #print(f"Is shooting: {accel}")

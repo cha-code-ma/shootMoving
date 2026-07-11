@@ -20,11 +20,11 @@ class halfLifeManager():
         self.Ycenter = self.heigth // 2
 
 
-    def walk(self, direct, speed):
-        t = threading.Thread(target = self.walk_thread, args=[direct, speed])
+    def walk(self, direct):
+        t = threading.Thread(target = self.walk_thread, args=[direct])
         t.start()
 
-    def walk_thread(self, direct, speed):
+    def walk_thread(self, direct):
         with self.pyautoguiLock:
             if direct == walkingStatus.FORWARD:
                 pyautogui.keyDown('w')

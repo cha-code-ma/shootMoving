@@ -134,19 +134,19 @@ class shootMovingUI(QMainWindow):
             self.ui.shootDetectionText.setPlainText(f"Is NOT shooting")
             self.ui.shootDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
 
-        if turning != turningStatus.STRAIGHT:
+        if turning == turningStatus.STRAIGHT:
             self.ui.turnDetectionText.setPlainText(f"Is NOT turning")
             self.ui.turnDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
         else:
             self.ui.turnDetectionText.setPlainText(f"Is turning: {turning}")
             self.ui.turnDetectionText.setStyleSheet("background-color: rgb(0, 255, 0);")
 
-        if walking != walkingStatus.STANDING:
-            self.ui.turnDetectionText.setPlainText(f"Is NOT walking")
-            self.ui.turnDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
+        if walking == walkingStatus.STANDING:
+            self.ui.walkDetextionText.setPlainText(f"Is NOT walking")
+            self.ui.walkDetextionText.setStyleSheet("background-color: rgb(255, 0, 0);")
         else:
-            self.ui.turnDetectionText.setPlainText(f"Is walking: {walking}")
-            self.ui.turnDetectionText.setStyleSheet("background-color: rgb(0, 255, 0);")
+            self.ui.walkDetextionText.setPlainText(f"Is walking: {walking}")
+            self.ui.walkDetextionText.setStyleSheet("background-color: rgb(0, 255, 0);")
 
     def startButtonClicked(self):
             self.timer.start()
@@ -157,11 +157,14 @@ class shootMovingUI(QMainWindow):
             self.isShooting = False
             self.ui.shootDetectionText.setPlainText(f"Is NOT shooting")
             self.ui.shootDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
+            self.ui.turnDetectionText.setPlainText(f"Is NOT turning")
+            self.ui.turnDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
+            self.ui.walkDetextionText.setPlainText(f"Is NOT walking")
+            self.ui.walkDetextionText.setStyleSheet("background-color: rgb(255, 0, 0);")
             return None
 
         self.movementDetected()
 
-        #lastValues = self.chooseValuesIndex(-1)
 
         self.ui.MplWidget.canvas.axes.clear()
         self.ui.MplWidget.canvas.axes.set_ylim(-50, 50)
@@ -174,7 +177,7 @@ class shootMovingUI(QMainWindow):
         self.ui.MplWidget.canvas.axes.set_xlabel("tijd (s)")
         self.ui.MplWidget.canvas.axes.set_ylabel("acceleration (9,81 m/s^2)")
         self.ui.MplWidget.canvas.axes.figure.tight_layout()
-        self.ui.MplWidget.canvas.axes.legend(loc= 'upper left')
+        self.ui.MplWidget.canvas.axes.legend(loc='upper left')
         self.ui.MplWidget.canvas.draw()
 
 

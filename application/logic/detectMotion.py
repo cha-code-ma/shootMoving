@@ -27,6 +27,7 @@ class movementDetector():
         self.walkingDirection = walkingStatus.STANDING
         self.speedWalking = 1
         self.lastRegisterdWalkTime = 0
+
         #halfLife:
         self.halfLifeManager = halfLifeManager()
 
@@ -44,11 +45,11 @@ class movementDetector():
                 if positive:
                     self.walkingDirection = walkingStatus.FORWARD
                     self.lastStartWalkingTime = currentTime
-                    self.halfLifeManager.walk(self.walkingDirection, 1)
+                    self.halfLifeManager.walk(self.walkingDirection)
                 else:
                     self.walkingDirection = walkingStatus.BACKWARD
                     self.lastStartWalkingTime = currentTime
-                    self.halfLifeManager.walk(self.walkingDirection, 1)
+                    self.halfLifeManager.walk(self.walkingDirection)
             elif self.walkingDirection == walkingStatus.FORWARD:
                 if not positive:
                     self.walkingDirection = walkingStatus.STANDING
@@ -166,12 +167,13 @@ class movementDetector():
         return recentIndex, positive, lastRegisteredTime
 
 
-    def turning(self, valuesList: list, timeList: list, amountSamples=10) -> turningStatus:
+    def turning(self, valuesList: list, timeList: list, amountSamples=10) -> tuple[turningStatus, bool]:
         """
         if turning == turningStatus.TURNING:
             print(f"turning: {direc}")
             self.halfLifeManager.turn(direc)
         """
+
         currentTime = timeList[-1]
         if not currentTime:
             currentTime = 0
@@ -200,6 +202,9 @@ class movementDetector():
 
         if currentTime - self.lastRegisteredTurnTime >= 0.9:
             self.turningStatus = turningStatus.STRAIGHT
+
+
+
 
         return self.turningStatus
 
