@@ -6,7 +6,7 @@ from halfLife.halfLifeShooting import halfLifeManager
 
 
 class movementDetector():
-    ACCEL_TRESHOLD = 0.8
+    ACCEL_TRESHOLD = 1.2
     GRAVITY_TRESHOLD = 0.75
 
     BLOCK_TURN_DURATION = 0.9
@@ -117,7 +117,8 @@ class movementDetector():
             for aList in lists:
                 shot, strength = self.fluctuation(aList, timeList, self.ACCEL_TRESHOLD, -amountSamples)
                 if  shot: #av >= self.GRAVITY_TRESHOLD and
-                    return shot, strength
+                    if abs(gyroList[2][-1]) < 100:
+                        return shot, strength
         return False, 0
 
 
@@ -186,6 +187,7 @@ class movementDetector():
             if self.turningStatus == turningStatus.STRAIGHT:
                 if positive:
                     self.walkinturningStatusgDirection = turningStatus.RIGHT
+                    self.turningStatus = turningStatus.RIGHT
                     self.lastRegisteredTurnTime = currentTime
                     self.halfLifeManager.turn(self.turningStatus)
                 else:

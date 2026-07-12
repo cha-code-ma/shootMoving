@@ -9,3 +9,9 @@ class walkingStatus(Enum):
     FORWARD = 1
     STANDING = 0
     BACKWARD = -1
+
+class actionStatus(Enum):
+    IDLE = 0
+    SHOOTING = 1
+    WALKING = 2
+    TURNING = 3

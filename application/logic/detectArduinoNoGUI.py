@@ -69,8 +69,13 @@ class BleCommunicationManager():
 
         async with BleakClient(d.address) as client:
             while not stop_event.is_set() and client.is_connected:
-                data = await client.read_gatt_char(SENSOR_UUID)
-                values = struct.unpack('7f', data)
-                valuesList = [values[0], values[1], values[2], values[3], values[4], values[5], values[6]]
-                q.put(valuesList)
-                await asyncio.sleep(0.2)
+                try:
+                    data = await client.read_gatt_char(SENSOR_UUID)
+                    values = struct.unpack('7f', data)
+                    valuesList = [values[0], values[1], values[2], values[3], values[4], values[5], values[6]]
+                    q.put(valuesList)
+                except:
+                    print("arduino read error")
+                    await asyncio.sleep(0.1)
+                    continue
+                await asyncio.sleep(0.1)

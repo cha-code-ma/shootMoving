@@ -53,12 +53,14 @@ class halfLifeManager():
     def turn_thread(self, direct: turningStatus):
         with self.pyautoguiLock:
             if direct == turningStatus.LEFT:
+                print("TURN LEFT")
                 pyautogui.moveTo(self.Xcenter, self.Ycenter)
-                pyautogui.dragRel(-self.Xcenter// 5, 0, duration=0.1)
+                pyautogui.dragRel(-self.Xcenter// 5, 0, duration=0.5)
                 pyautogui.moveTo(self.Xcenter, self.Ycenter)
             if direct == turningStatus.RIGHT:
+                print("TURN RIGHT")
                 pyautogui.moveTo(self.Xcenter, self.Ycenter)
-                pyautogui.dragRel(self.Xcenter// 5, 0, duration=0.1)
+                pyautogui.dragRel(self.Xcenter// 5, 0, duration=0.5)
                 pyautogui.moveTo(self.Xcenter, self.Ycenter)
 
     def test(self):

@@ -163,6 +163,7 @@ class shootMovingUI(QMainWindow):
             self.ui.walkDetextionText.setStyleSheet("background-color: rgb(255, 0, 0);")
             return None
 
+        print(f"ax:{self.allValues[0][-1]}   gx:{self.allValues[3][-1]}    gz:{self.allValues[5][-1]}")
         self.movementDetected()
 
 
