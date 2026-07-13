@@ -17,7 +17,7 @@ else:
 class halfLifeManager():
     pyautoguiLock = threading.Lock()
 
-    
+
     def __init__(self):
         self.width, self.heigth = input_lib.size()
         self.Xcenter = self.width // 2
@@ -59,12 +59,12 @@ class halfLifeManager():
             if direct == turningStatus.LEFT:
                 print("TURN LEFT")
                 input_lib.moveTo(self.Xcenter, self.Ycenter)
-                input_lib.drag(-self.Xcenter // 5, 0, duration=0.4, button='left')
+                input_lib.dragTo(self.Xcenter - (self.Xcenter // 5), 0, duration=0.4, button='left')
                 input_lib.moveTo(self.Xcenter, self.Ycenter)
             if direct == turningStatus.RIGHT:
                 print("TURN RIGHT")
                 input_lib.moveTo(self.Xcenter, self.Ycenter)
-                input_lib.drag(self.Xcenter // 5, 0, duration=0.4, button='left')
+                input_lib.dragTo(self.Xcenter + (self.Xcenter // 5), 0, duration=0.4, button='left')
                 input_lib.moveTo(self.Xcenter, self.Ycenter)
 
     def test(self):
