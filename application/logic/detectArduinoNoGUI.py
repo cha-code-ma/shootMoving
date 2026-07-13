@@ -74,8 +74,9 @@ class BleCommunicationManager():
                     values = struct.unpack('7f', data)
                     valuesList = [values[0], values[1], values[2], values[3], values[4], values[5], values[6]]
                     q.put(valuesList)
-                except:
+                except Exception as e:
                     print("arduino read error")
-                    await asyncio.sleep(0.1)
+                    print(f"arduino read error: {type(e).__name__}: {e}")
+                    await asyncio.sleep(0.2)
                     continue
                 await asyncio.sleep(0.1)

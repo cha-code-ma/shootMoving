@@ -110,7 +110,7 @@ class movementDetector():
             for aList in lists:
                 shot, strength = self.fluctuation(aList, timeList, self.ACCEL_TRESHOLD, -amountSamples)
                 if  shot: #av >= self.GRAVITY_TRESHOLD and
-                    if abs(gyroList[2][-1]) < 100:
+                    if gyroList[2][-1]  < 100:
                         return shot, strength
         return False, 0
 

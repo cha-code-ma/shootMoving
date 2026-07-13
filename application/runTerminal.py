@@ -85,8 +85,7 @@ class shootMoving():
             self.isShooting = False
             #print(f"Is NOT shooting")
 
-        print(f"gz: {self.allValues[5][-1]}")
-        print(f"gx: {self.allValues[0][-1]}")
+        print(f"ax:{self.allValues[0][-1]}   gx:{self.allValues[3][-1]}    gz:{self.allValues[5][-1]}", flush=True)
 
 
     def loopEvent(self):
