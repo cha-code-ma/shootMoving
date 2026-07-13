@@ -65,13 +65,18 @@ class halfLifeManager():
                     pyautogui.moveTo(self.Xcenter, self.Ycenter)
                 else:
                     input_lib.moveTo(self.Xcenter, self.Ycenter)
-                    input_lib.dragRel(self.Xcenter // 5, 0, duration=0.4, button='left')
+                    input_lib.dragRel(-self.Xcenter // 5, 0, duration=0.4, button='left')
                     input_lib.moveTo(self.Xcenter, self.Ycenter)
             if direct == turningStatus.RIGHT:
                 print("TURN RIGHT")
-                input_lib.moveTo(self.Xcenter, self.Ycenter)
-                input_lib.dragTo(self.Xcenter + (self.Xcenter // 5), 0, duration=0.4, button='left')
-                input_lib.moveTo(self.Xcenter, self.Ycenter)
+                if platform.system() == "Windows":
+                    pyautogui.moveTo(self.Xcenter, self.Ycenter)
+                    pyautogui.dragRel(  (self.Xcenter // 5), 0, duration=0.4, button='left')
+                    pyautogui.moveTo(self.Xcenter, self.Ycenter)
+                else:
+                    input_lib.moveTo(self.Xcenter, self.Ycenter)
+                    input_lib.dragRel(self.Xcenter // 5, 0, duration=0.4, button='left')
+                    input_lib.moveTo(self.Xcenter, self.Ycenter)
 
     def test(self):
 
