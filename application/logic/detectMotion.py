@@ -15,6 +15,11 @@ class movementDetector():
     WALKING_TRESHOLD = 100
     BLOCK_WALK_DURATION = 0.8
     def __init__(self):
+        #shoot variables:
+        self.lastRegisterdShootTime = 0
+        self.shooting = False
+
+
         #turning variables:
         self.blockedTurningStartTime = 0
         self.turningStatus = turningStatus.STRAIGHT
@@ -66,11 +71,12 @@ class movementDetector():
         return False
 
     def shoot(self, valueList, timeList, amountSamples=2):
+        currentTime = timeList[-1]
         shoot, _ = self.isShooting(valueList, timeList)
         shot = not self.stopShooting(valueList, timeList)
-        if shot:
+        if currentTime - self.lastRegisterdShootTime > 0.2 and shot:
             self.halfLifeManager.shoot()
-
+            self.lastRegisterdShootTime = currentTime
         return shot
 
     def stopShooting(self, valuesList, timeList, amountSamples = 2) -> bool:

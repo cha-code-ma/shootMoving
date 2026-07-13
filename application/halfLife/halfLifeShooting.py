@@ -11,6 +11,7 @@ from logic.enums import turningStatus, walkingStatus
 import platform
 if platform.system() == "Windows":
     import pydirectinput as input_lib
+    import pyautogui
 else:
     import pyautogui as input_lib
 
@@ -58,9 +59,14 @@ class halfLifeManager():
         with self.pyautoguiLock:
             if direct == turningStatus.LEFT:
                 print("TURN LEFT")
-                input_lib.moveTo(self.Xcenter, self.Ycenter)
-                input_lib.dragTo(self.Xcenter - (self.Xcenter // 5), 0, duration=0.4, button='left')
-                input_lib.moveTo(self.Xcenter, self.Ycenter)
+                if platform.system() == "Windows":
+                    pyautogui.moveTo(self.Xcenter, self.Ycenter)
+                    pyautogui.dragTo(self.Xcenter - (self.Xcenter // 5), 0, duration=0.4, button='left')
+                    pyautogui.moveTo(self.Xcenter, self.Ycenter)
+                else:
+                    input_lib.moveTo(self.Xcenter, self.Ycenter)
+                    input_lib.dragTo(self.Xcenter - (self.Xcenter // 5), 0, duration=0.4, button='left')
+                    input_lib.moveTo(self.Xcenter, self.Ycenter)
             if direct == turningStatus.RIGHT:
                 print("TURN RIGHT")
                 input_lib.moveTo(self.Xcenter, self.Ycenter)
