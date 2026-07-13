@@ -77,6 +77,6 @@ class BleCommunicationManager():
                 except Exception as e:
                     print("arduino read error")
                     print(f"arduino read error: {type(e).__name__}: {e}")
-                    await asyncio.sleep(0.2)
+                    await asyncio.sleep(0.1)
                     continue
                 await asyncio.sleep(0.1)
