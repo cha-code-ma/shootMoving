@@ -37,7 +37,7 @@ Command prompt:
 venv\Scripts\activate.bat
 
 5.Pakketen instaleren:
-pip install pyautogui PyQt5 bleak matplotlib
+pip install pyautogui pydirectinput PyQt5 bleak matplotlib
 
 ### Now run this program:
 now go to the `application` subfolder and run:
