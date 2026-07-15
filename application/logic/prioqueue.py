@@ -1,5 +1,5 @@
 import threading
-from enums import actionStatus
+from logic.enums import actionStatus
 from halfLife.halfLifeShooting import halfLifeManager
 class prioQueue():
 
