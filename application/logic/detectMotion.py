@@ -1,9 +1,9 @@
 """
 
 """
-from logic.enums import turningStatus, walkingStatus
+from logic.enums import turningStatus, walkingStatus, actionStatus
 from halfLife.halfLifeShooting import halfLifeManager
-
+from prioQueue import  prioQueue
 
 class movementDetector():
     ACCEL_TRESHOLD = 1.2
@@ -16,6 +16,7 @@ class movementDetector():
     BLOCK_WALK_DURATION = 0.8
     def __init__(self):
         #shoot variables:
+        self.prioQueue = prioQueue()
         self.lastRegisterdShootTime = 0
         self.shooting = False
 
@@ -50,11 +51,14 @@ class movementDetector():
                 if positive:
                     self.walkingDirection = walkingStatus.FORWARD
                     self.lastStartWalkingTime = currentTime
-                    self.halfLifeManager.walk(self.walkingDirection)
+                    self.prioQueue.add(1, self.walkingDirection ,actionStatus.WALKING)
+                    #self.halfLifeManager.walk(self.walkingDirection)
                 else:
                     self.walkingDirection = walkingStatus.BACKWARD
                     self.lastStartWalkingTime = currentTime
-                    self.halfLifeManager.walk(self.walkingDirection)
+                    self.prioQueue.add(1, self.walkingDirection ,actionStatus.WALKING)
+
+                    #self.halfLifeManager.walk(self.walkingDirection)
 
         if currentTime - self.lastStartWalkingTime >= 0.9:
             self.walkingDirection = walkingStatus.STANDING
@@ -75,7 +79,8 @@ class movementDetector():
         shoot, _ = self.isShooting(valueList, timeList)
         shot = not self.stopShooting(valueList, timeList)
         if currentTime - self.lastRegisterdShootTime > 0.2 and shot:
-            self.halfLifeManager.shoot()
+            self.prioQueue.add(2,None ,actionStatus.SHOOTING)
+            #self.halfLifeManager.shoot()
             self.lastRegisterdShootTime = currentTime
         return shot
 
@@ -188,11 +193,13 @@ class movementDetector():
                     self.walkinturningStatusgDirection = turningStatus.RIGHT
                     self.turningStatus = turningStatus.RIGHT
                     self.lastRegisteredTurnTime = currentTime
-                    self.halfLifeManager.turn(self.turningStatus)
+                    self.prioQueue.add(1, self.turningStatus, actionStatus.TURNING)
+                    #self.halfLifeManager.turn(self.turningStatus)
                 else:
                     self.turningStatus = turningStatus.LEFT
                     self.lastRegisteredTurnTime = currentTime
-                    self.halfLifeManager.turn(self.turningStatus)
+                    self.prioQueue.add(1, self.turningStatus, actionStatus.TURNING)
+                    #self.halfLifeManager.turn(self.turningStatus)
 
         if currentTime - self.lastRegisteredTurnTime >= 0.9:
             self.turningStatus = turningStatus.STRAIGHT
@@ -238,7 +245,7 @@ class movementDetector():
         shot = self.shoot(allValues, time)
         turning = self.turning(allValues, time)
         walking = self.walking(allValues, time)
-
+        self.prioQueue.run()
         return shot, turning, walking
 
 
