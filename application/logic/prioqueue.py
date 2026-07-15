@@ -24,11 +24,11 @@ class prioQueue():
             return None
 
         action = self.queue.pop(0)
-        if action[1] == actionStatus.SHOOTING:
+        if action[2] == actionStatus.SHOOTING:
             self.halfLifeManager.shoot()
-        elif action[1] == actionStatus.TURNING:
+        elif action[2] == actionStatus.TURNING:
             self.halfLifeManager.turn(action[2])
-        elif action[1] == actionStatus.WALKING:
+        elif action[2] == actionStatus.WALKING:
             self.halfLifeManager.walk(action[2])
 
 

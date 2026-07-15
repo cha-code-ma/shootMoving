@@ -84,7 +84,7 @@ class shootMoving():
         else:
             self.isShooting = False
             #print(f"Is NOT shooting")
-
+    
         print(f"ax:{self.allValues[0][-1]}   gx:{self.allValues[3][-1]}    gz:{self.allValues[5][-1]}", flush=True)
 
 
