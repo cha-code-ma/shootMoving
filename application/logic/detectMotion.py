@@ -3,7 +3,7 @@
 """
 from logic.enums import turningStatus, walkingStatus, actionStatus
 from halfLife.halfLifeShooting import halfLifeManager
-from prioQueue import  prioQueue
+from logic.prioqueue import  prioQueue
 
 class movementDetector():
     ACCEL_TRESHOLD = 1.2
