@@ -27,9 +27,9 @@ class prioQueue():
         if action[2] == actionStatus.SHOOTING:
             self.halfLifeManager.shoot()
         elif action[2] == actionStatus.TURNING:
-            self.halfLifeManager.turn(action[2])
+            self.halfLifeManager.turn(action[1])
         elif action[2] == actionStatus.WALKING:
-            self.halfLifeManager.walk(action[2])
+            self.halfLifeManager.walk(action[1])
 
 
 
