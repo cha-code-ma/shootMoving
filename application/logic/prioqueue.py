@@ -16,9 +16,8 @@ class prioQueue():
             if element[0] < inQueue[0]:
                 self.queue.insert(i, element)
                 break
-        print(self.queue)
-
         self.queue.append(element)
+
 
     def run(self):
         if len(self.queue) == 0:

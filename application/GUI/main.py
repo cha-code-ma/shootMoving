@@ -10,7 +10,7 @@ dit is de start, geen implementatie, alleen basis voor PyQt5
 """
 
 import logic.detectArduino, logic.detectMotion
-from logic.enums import turningStatus, walkingStatus
+from logic.enums import turningStatus, walkingStatus, AMOUNT_OF_CHECKS
 from GUI.window_ui import Ui_Form
 import sys
 from PyQt5.QtCore import Qt
@@ -25,7 +25,7 @@ matplotlib.use("Qt5Agg")
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
-TIMER_INTERVAL_VALUE = 100
+TIMER_INTERVAL_VALUE = 300
 AMOUNT_OF_ARDUINO_VALUES = 7
 AMOUNT_OF_MOMENTS = 100
 AMOUNT_OF_GRAPH_MOMENTS = 30
@@ -45,7 +45,7 @@ class shootMovingUI(QMainWindow):
         #MPLwidget:
         self.ui = Ui_Form()
         self.timer = QTimer()
-        self.timer.setInterval(TIMER_INTERVAL_VALUE)
+        self.timer.setInterval(1/AMOUNT_OF_CHECKS)
         self.timer.timeout.connect(self.timerEvent)
         self.ui.setupUi(self)
         self.setWindowTitle("Project")
@@ -86,8 +86,11 @@ class shootMovingUI(QMainWindow):
         if type(values) is bool or len(values) != AMOUNT_OF_ARDUINO_VALUES:
             return None
         lastValues = list(zip(*self.allValues))[-1][0:6]
+        temp = []
+        for i in range(AMOUNT_OF_ARDUINO_VALUES) - 1:
+            temp.append(round(values[i], 3))
 
-        if lastValues == list(values[0:6]):
+        if lastValues == temp: # if values are the same as reading before.
             return None
 
         for i in range(AMOUNT_OF_ARDUINO_VALUES):

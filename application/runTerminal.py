@@ -3,6 +3,7 @@ Gemaakt door: Github: cha-code-ma
 
 """
 import logic.detectArduinoNoGUI, logic.detectMotion
+from logic.enums import AMOUNT_OF_CHECKS
 from time import sleep
 import threading
 import queue
@@ -42,7 +43,7 @@ class shootMoving():
         try:
             while(1):
                 self.loopEvent()
-                sleep(0.1)
+                sleep(1/AMOUNT_OF_CHECKS)
         except KeyboardInterrupt:
                 print("closing...")
         finally:
@@ -84,7 +85,7 @@ class shootMoving():
         else:
             self.isShooting = False
             #print(f"Is NOT shooting")
-    
+
         print(f"ax:{self.allValues[0][-1]}   gx:{self.allValues[3][-1]}    gz:{self.allValues[5][-1]}", flush=True)
 
 
