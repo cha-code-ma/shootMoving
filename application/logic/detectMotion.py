@@ -190,13 +190,14 @@ class movementDetector():
         if lastActivationIndex is not None:
             if self.turningStatus == turningStatus.STRAIGHT:
                 if positive:
-                    self.walkinturningStatusgDirection = turningStatus.RIGHT
-                    self.turningStatus = turningStatus.RIGHT
+
+                    self.turningStatus = turningStatus.LEFT
                     self.lastRegisteredTurnTime = currentTime
                     self.prioQueue.add(1, self.turningStatus, actionStatus.TURNING)
                     #self.halfLifeManager.turn(self.turningStatus)
                 else:
-                    self.turningStatus = turningStatus.LEFT
+
+                    self.turningStatus = turningStatus.RIGHT
                     self.lastRegisteredTurnTime = currentTime
                     self.prioQueue.add(1, self.turningStatus, actionStatus.TURNING)
                     #self.halfLifeManager.turn(self.turningStatus)

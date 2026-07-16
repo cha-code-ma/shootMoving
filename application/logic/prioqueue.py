@@ -12,10 +12,11 @@ class prioQueue():
         element = (priority, action, actionType, speed)
         if len(self.queue) == 0:
             self.queue.append(element)
-        for i, action in enumerate(self.queue):
-            if element[0] < action[0]:
+        for i, inQueue in enumerate(self.queue):
+            if element[0] < inQueue[0]:
                 self.queue.insert(i, element)
-                return None
+                break
+        print(self.queue)
 
         self.queue.append(element)
 
