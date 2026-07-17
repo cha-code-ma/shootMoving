@@ -36,7 +36,7 @@ Download en installeer Python via python.org. Vink tijdens installatie "Add Pyth
 
 3. Terminal openen
 Open Command Prompt as administrator. and because you now start at C:Windows\System32, you need to do:
-cd C:\Users\<your-username>\<path to shootmoving-main>
+`cd C:\Users\<your-username>\<path to shootmoving-main>`
 
 5. Venv aanmaken:
 python -m venv venv. Dit moet gedaan worden in de `application` folder.
