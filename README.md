@@ -41,7 +41,9 @@ pip install pyautogui pydirectinput PyQt5 bleak matplotlib
 
 ### Now run this program:
 now go to the `application` subfolder and run:
+
 -python -m app.py yesgui     --if you want a pyqt5 gui
+
 -python -m app.py nogui      --if you only want to use the terminal
 
 good luck!
