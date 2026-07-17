@@ -52,12 +52,13 @@ class shootMoving():
 
     def addValues(self, values) -> bool:
         if type(values) is bool or len(values) != AMOUNT_OF_ARDUINO_VALUES:
-            return None
+            return True
+
         lastValues = list(zip(*self.allValues))[-1][0:6]
         temp = []
         for i in range(AMOUNT_OF_ARDUINO_VALUES - 1):
             temp.append(round(values[i], 3))
-
+        print(f"new: {temp}, lastValues : {lastValues}")
         if lastValues == temp: # if values are the same as reading before.
             return True
 
@@ -103,6 +104,8 @@ class shootMoving():
             data = self.q.get(timeout=0.05)
             #print(f"data:{data}")
             duplicate = self.addValues(data)
+            print(f"duplicate: {duplicate}")
+
             if duplicate:
                 return None
         except queue.Empty:
