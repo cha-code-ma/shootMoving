@@ -1,6 +1,15 @@
 # shootMoving
-In this repository, we will use the Adruino Nano IoT microchip and Python to shoot in the game Half-Life, whenever the person moves the adruino back and forth (shooting motion).
-The way shooting is happening is by the python library pyautogui, so this means it just does a mouse click in the center of your sceen, whenever you move the arduino in a shooting motion.
+In this repository, we will use the Adruino Nano IoT microchip and Python to shoot, walk and turn in the game Half-Life.
+
+You need to position the arduino, so that the charching port is facing you.
+
+You can shoot, by doing a back and forth motion, like shooting a gun with your arduino.
+
+you can turn, by turning your arduino left or right.
+
+you can walk, by tilting your arduino wordward or backwards.
+
+The way shooting is happening is by the python library pyautogui and pydirectinput, so this means it just does a mouse click in the center of your sceen, whenever you move the arduino in a shooting motion.
 
 
 ## How to start?
