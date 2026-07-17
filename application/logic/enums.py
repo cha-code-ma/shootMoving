@@ -1,6 +1,6 @@
 from enum import Enum
 
-AMOUNT_OF_CHECKS = 3
+AMOUNT_OF_CHECKS = 10
 
 class turningStatus(Enum):
     LEFT = 1

@@ -25,7 +25,7 @@ matplotlib.use("Qt5Agg")
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
-TIMER_INTERVAL_VALUE = 300
+
 AMOUNT_OF_ARDUINO_VALUES = 7
 AMOUNT_OF_MOMENTS = 100
 AMOUNT_OF_GRAPH_MOMENTS = 30
@@ -45,7 +45,7 @@ class shootMovingUI(QMainWindow):
         #MPLwidget:
         self.ui = Ui_Form()
         self.timer = QTimer()
-        self.timer.setInterval(1/AMOUNT_OF_CHECKS)
+        self.timer.setInterval(1000/AMOUNT_OF_CHECKS)
         self.timer.timeout.connect(self.timerEvent)
         self.ui.setupUi(self)
         self.setWindowTitle("Project")
