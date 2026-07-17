@@ -50,16 +50,16 @@ class shootMoving():
             self.stopEvent.set()
             self.thread.join()
 
-    def addValues(self, values):
+    def addValues(self, values) -> bool:
         if type(values) is bool or len(values) != AMOUNT_OF_ARDUINO_VALUES:
             return None
         lastValues = list(zip(*self.allValues))[-1][0:6]
         temp = []
-        for i in range(AMOUNT_OF_ARDUINO_VALUES) - 1:
+        for i in range(AMOUNT_OF_ARDUINO_VALUES - 1):
             temp.append(round(values[i], 3))
 
         if lastValues == temp: # if values are the same as reading before.
-            return None
+            return True
 
         for i in range(AMOUNT_OF_ARDUINO_VALUES):
             if i == AMOUNT_OF_ARDUINO_VALUES - 1:
@@ -72,6 +72,7 @@ class shootMoving():
 
             self.allValues[i][-AMOUNT_OF_MOMENTS:]
             self.graphValues[i] = self.allValues[i][-AMOUNT_OF_GRAPH_MOMENTS:]
+        return False
 
 
     def chooseValuesIndex(self, index):
@@ -101,10 +102,11 @@ class shootMoving():
 
             data = self.q.get(timeout=0.05)
             #print(f"data:{data}")
-            self.addValues(data)
-
+            duplicate = self.addValues(data)
+            if duplicate:
+                return None
         except queue.Empty:
-            pass
+            return None
 
         if self.allValues == [[0], [0], [0], [0], [0], [0]]:
             self.isShooting = False

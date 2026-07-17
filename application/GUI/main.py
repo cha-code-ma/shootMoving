@@ -82,16 +82,16 @@ class shootMovingUI(QMainWindow):
         self.timerEvent()
         self.timer.start()
 
-    def addValues(self, values):
+    def addValues(self, values) -> bool:
         if type(values) is bool or len(values) != AMOUNT_OF_ARDUINO_VALUES:
             return None
         lastValues = list(zip(*self.allValues))[-1][0:6]
         temp = []
-        for i in range(AMOUNT_OF_ARDUINO_VALUES) - 1:
+        for i in range(AMOUNT_OF_ARDUINO_VALUES - 1):
             temp.append(round(values[i], 3))
 
         if lastValues == temp: # if values are the same as reading before.
-            return None
+            return True
 
         for i in range(AMOUNT_OF_ARDUINO_VALUES):
             if i == AMOUNT_OF_ARDUINO_VALUES - 1:
@@ -104,7 +104,7 @@ class shootMovingUI(QMainWindow):
 
             self.allValues[i][-AMOUNT_OF_MOMENTS:]
             self.graphValues[i] = self.allValues[i][-AMOUNT_OF_GRAPH_MOMENTS:]
-
+        return True
 
     def chooseValuesIndex(self, index):
         list = []
@@ -154,9 +154,18 @@ class shootMovingUI(QMainWindow):
     def startButtonClicked(self):
             self.timer.start()
 
+
+    def sameValues(self, allValues):
+        if len(allValues) < 2:
+            return False
+        currentValues = zip(list(*allValues[0:6]))[-1]
+        lastValues = zip(list(*allValues[0:6]))[-2]
+        return True if currentValues == lastValues else False
+
+
     def timerEvent(self):
 
-        if self.allValues == [[0], [0], [0], [0], [0], [0]]:
+        if self.allValues == [[0], [0], [0], [0], [0], [0]] or self.sameValues(self.allValues):
             self.isShooting = False
             self.ui.shootDetectionText.setPlainText(f"Is NOT shooting")
             self.ui.shootDetectionText.setStyleSheet("background-color: rgb(255, 0, 0);")
