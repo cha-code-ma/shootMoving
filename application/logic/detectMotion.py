@@ -6,20 +6,27 @@ from halfLife.halfLifeShooting import halfLifeManager
 from logic.prioqueue import  prioQueue
 
 class movementDetector():
+    #shooting:
     ACCEL_TRESHOLD = 1.2
     GRAVITY_TRESHOLD = 0.75
+    SHOT_COOLDOWN = 0.7
 
+
+    #turning:
     BLOCK_TURN_DURATION = 0.9
     TURNING_TRESHOLD = 100
+    TURN_COOLDOWN = 1
 
+    #walking:
     WALKING_TRESHOLD = 100
     BLOCK_WALK_DURATION = 0.8
+    WALK_COOLDOWN = 1
+
     def __init__(self):
         #shoot variables:
         self.prioQueue = prioQueue()
         self.lastRegisterdShootTime = 0
         self.shooting = False
-
 
         #turning variables:
         self.blockedTurningStartTime = 0
@@ -28,7 +35,6 @@ class movementDetector():
         self.lastRegisteredTurnTime = 0
 
         #walking variables:
-
         self.lastStartWalkingTime = 0
         self.walkingDirection = walkingStatus.STANDING
         self.speedWalking = 1
@@ -60,7 +66,7 @@ class movementDetector():
 
                     #self.halfLifeManager.walk(self.walkingDirection)
 
-        if currentTime - self.lastStartWalkingTime >= 0.9:
+        if currentTime - self.lastStartWalkingTime >= self.WALK_COOLDOWN:
             self.walkingDirection = walkingStatus.STANDING
 
         return self.walkingDirection
@@ -78,7 +84,7 @@ class movementDetector():
         currentTime = timeList[-1]
         shoot, _ = self.isShooting(valueList, timeList)
         shot = not self.stopShooting(valueList, timeList)
-        if currentTime - self.lastRegisterdShootTime > 0.2 and shot:
+        if currentTime - self.lastRegisterdShootTime > self.SHOT_COOLDOWN and shot:
             self.prioQueue.add(2,None ,actionStatus.SHOOTING)
             #self.halfLifeManager.shoot()
             self.lastRegisterdShootTime = currentTime
@@ -202,7 +208,7 @@ class movementDetector():
                     self.prioQueue.add(1, self.turningStatus, actionStatus.TURNING)
                     #self.halfLifeManager.turn(self.turningStatus)
 
-        if currentTime - self.lastRegisteredTurnTime >= 0.9:
+        if currentTime - self.lastRegisteredTurnTime >= self.TURN_COOLDOWN:
             self.turningStatus = turningStatus.STRAIGHT
 
 
