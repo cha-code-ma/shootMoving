@@ -87,7 +87,7 @@ class shootMovingUI(QMainWindow):
             return None
         lastValues = list(zip(*self.allValues))[-1][0:6]
         temp = []
-        for i in range(AMOUNT_OF_ARDUINO_VALUES) - 1:
+        for i in range(AMOUNT_OF_ARDUINO_VALUES - 1):
             temp.append(round(values[i], 3))
 
         if lastValues == temp: # if values are the same as reading before.
