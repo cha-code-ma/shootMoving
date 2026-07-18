@@ -91,6 +91,18 @@ class shootMovingUI(QMainWindow):
             temp.append(round(values[i], 3))
 
         if lastValues == temp: # if values are the same as reading before.
+            values = [0, 0, 0, 0, 0, 0, values[6]]
+            for i in range(AMOUNT_OF_ARDUINO_VALUES):
+                if i == AMOUNT_OF_ARDUINO_VALUES - 1:
+                    self.time.append(round(values[i]/1000, 3))
+                    self.time = self.time[-AMOUNT_OF_GRAPH_MOMENTS:]
+                    continue
+
+                self.allValues[i].append(round(values[i], 3))
+                self.graphValues[i].append(round(values[i], 3))
+
+                self.allValues[i][-AMOUNT_OF_MOMENTS:]
+                self.graphValues[i] = self.allValues[i][-AMOUNT_OF_GRAPH_MOMENTS:]
             return True
 
         for i in range(AMOUNT_OF_ARDUINO_VALUES):
